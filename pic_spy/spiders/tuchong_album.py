@@ -2,44 +2,32 @@ import os, sys
 import json
 import time
 import re
+from urllib import parse
 import random
 import hashlib
 from scrapy.spider import BaseSpider
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http import FormRequest
+import my_config.config
+
 
 class PocoSpider(BaseSpider):
-    name =  'poco_album_spider'
+    name =  'tuchong_album'
     start_urls = []
-    allowed_domains = ["poco.cn", 'pocoimg.cn']
-    api_url = "http://web-api.poco.cn/v1_1/space/get_user_works_list"
+    allowed_domains = ["tuchong.com", 'photo.tuchong.com']
+    api_url = '/rest/2/sites/[uid]/posts?count=100&page=1&before_timestamp=0'
+    photo_host = 'https://photo.tuchong.com/[uid]/f/[pid].jpg'
     cur_page = 1
-    page_size = 18
-    my_poco_id = 173522648
-    account_ids = {
-    	'174574302':'f2a37d9659d2fb48085',
-    	'174572931':'406ef59705efb4e425f',
-    	'177176218':'9229061252cccadb18f',
-    	'173388816':'6b5b2f8292b593118ad',
-    	'174848104':'3e1daaec63f772edfcc',
-    	'185652848':'8e39023858be8d32e21',
-    	'200513958':'77c2259120872addd25',
-    	'63443172':'35aa80b13d3ad3d5d4e',
-    	'178957211':'5575cdfba172fd87a46',
-    	'174079515':'3f24a5c860313797d4d',
-    	'19430718':'0ce08eed59bd0cef426',
-    	'67593620':'054a8f14068e0c51998',
-    	'3417570':'ced79f0568fa7cadaa1',
-    	'174730832':'90d1fe0c81a11a1f17c',
-    	'66546564':'1177c50fe7622b99154'
-    }
+    page_size = 20
+    finished_pic_num = 0
+    finished_album_num = 0
+    account_ids = None
     save_path = '/home/python/pic_spy/albums'
     saved_counter = 0
     headers={
         "User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:49.0) Gecko/20100101 Firefox/49.0",
-        "Origin":"http://www.poco.cn",
-        "Referer":"http://www.poco.cn /user/user_center?user_id=173522648",
-        "Host":"web-api.poco.cn",
+        "Origin":"https://www.tuchong.com",
+        "Referer":"https://www.tuchong.com",
         "Connection":"Keep-Alive",
         "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8"
     }
@@ -83,75 +71,49 @@ class PocoSpider(BaseSpider):
     ]
 
     def __init__(self):
+        self.save_path = os.path.join(self.save_path, self.name)
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
         # end if
+        self.account_ids = my_config.config.artist_list
         super().__init__()
     #end def
 
     def start_requests(self):
         initRequests = []
         for id in self.account_ids:
-            request = FormRequest(self.api_url, callback=self.__parse_alum_list, formdata=self.__formData(id, self.cur_page), headers=self.__getHeader())
+            request = FormRequest(self.account_ids[id]+''+self.api_url.replace('[uid]', id), callback=self.__parse_alum_list, formdata=None, headers=self.__getHeader())
             initRequests.append(request)
         #end for
         return initRequests
     #end def
 
-    def __formData(self, uid, page):
-        len = self.page_size
-        start = (page-1)*len
-        param = {"user_id": self.my_poco_id,
-                 "visited_user_id": 0,
-                 "keyword": "",
-                 "year": 0,
-                 "length": len,
-                 "start": start
-                 }
-        res = {
-            "version": "1.1.0",
-            "app_name": "poco_photography_web",
-            "os_type": "weixin",
-            "is_enc": 0,
-            "env": "prod",
-            "ctime": int(str(int(time.time())) + "123"),
-            "param": None,
-            "sign_code": ''
-        }
-        formdata = {
-            'host_port': 'http: // www.poco.cn',
-            'req': ''
-        }
 
-        header = self.headers
-        header['Referer'] = header['Referer'] + "" + str(uid)
-        param['visited_user_id'] = int(uid)
-        res['param'] = param  # ['visited_user_id'] = id
-        res['sign_code'] = self.account_ids[uid]  #self.__sign_code(param)
-        formdata['req'] = json.dumps(res)
-
-        return formdata
+    def close(self):
+        print('finished ' + str(self.finished_album_num) + ' albums')
+        print('finished ' + str(self.finished_pic_num)+' pics')
+        print('>>>>>>>> close here <<<<<<')
     #end def
 
 
     def __parse_alum_list(self, response):
         if response.status != 200 or response.text == '':
-            print(str(response.status) + ' >>>>>>>>> ' + response.text)
+            print('request error >> '+str(response.status) + ' >>>>>>>>> ')
             return None
         # end if
         album_num = 0;
+        host = self.__userHost(response.url)
         try:
             jsonObj = json.loads(response.text)
             cur_user_id = 0
-            if 'data' in jsonObj and 'list' in jsonObj['data']:
-                for work in jsonObj['data']['list']:
-                    cur_user_id = int(work['user_id'])
-                    #albumUrls.append('http://www.poco.cn/works/detail?works_id='+str(work['works_id']))
-                    yield FormRequest('http://www.poco.cn/works/detail?works_id='+str(work['works_id']), callback=self.__parse_album)#, formdata=None, headers=self.__getHeader())   #
-                    album_num = album_num +1
+            if 'post_list' in jsonObj:
+                print(response.url+' >>> to crawl '+str(len(jsonObj['post_list']))+' albums')
+                for post in jsonObj['post_list']:
+                    yield FormRequest(host+'/rest/posts/'+post['post_id'], callback=self.__parse_album_pics)#, formdata=None, headers=self.__getHeader())   #
+                    self.finished_album_num = self.finished_album_num + 1
                 #end for
             else:
-                print('request api error: '+jsonObj['message'])
+                print('>>>> request api error: <<<<')
             #end if
             if cur_user_id and 'has_more' in jsonObj and jsonObj['has_more']:
                 self.cur_page = self.cur_page + 1
@@ -160,7 +122,38 @@ class PocoSpider(BaseSpider):
         except json.decoder.JSONDecodeError:
             print('json error')
         #
-        print (response.url+' >>> to crawl '+str(album_num)+' albums')
+    #end def
+
+    def __parse_album_pics(self, response):
+        if response.status != 200 or response.text == '':
+            print('request error >> '+str(response.status) + ' >>>>>>>>> ')
+            return None
+        # end if
+        try:
+            jsonObj = json.loads(response.text)
+            segs = parse.urlparse(response.url)
+            userHost = segs[1]
+            if 'images' in jsonObj:
+                for image in jsonObj['images']:
+                    pic_url = self.photo_host.replace('[uid]', str(image['user_id']))
+                    pic_url = pic_url.replace('[pid]', str(image['img_id']))
+                    rs = self.__save_pic(pic_url, userHost)
+                    if rs:
+                        self.finished_pic_num = self.finished_pic_num +1
+                    #end if
+                #end for
+            else:
+                print('>>>  request api error: <<<<<')
+            #end if
+        except json.decoder.JSONDecodeError:
+            print('>>>>json error<<<<<<')
+        #
+    #end def
+
+
+    def __userHost(self, url):
+        segs = parse.urlparse(url)
+        return segs[0] + '://' + segs[1]
     #end def
 
     def __getHeader(self):
@@ -171,49 +164,36 @@ class PocoSpider(BaseSpider):
         return self.headers
     #end def
 
-    def __parse_album(self, response):
-        if response.status != 200 or response.text == '':
-            print(str(response.status) + ' >>>>>>>>> ' + response.text)
-            return None
-        # end if
-
-        selector = HtmlXPathSelector(response)
-        img_tags = selector.xpath('//img')
-        #print(' img tags num: ' + str(len(img_tags)))
-
-        for img in img_tags:
-            html = img.extract()
-            matches = re.search(r'data-src="(\S+)"', html)
-            if matches:
-                self.__save_pic(matches.group(1).replace('//', 'http://'))
-        #end
-    #end def
-
-    def __save_pic(self, pic_url):
+    def __save_pic(self, pic_url, host):
         pic_name =  pic_url.split('/')[-1]
-        pic_path = os.path.join(self.save_path, pic_name)
+        save_path = os.path.join(self.save_path, host)
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        # end if
+        pic_path = os.path.join(save_path, pic_name)
         if not os.path.isfile(pic_path):
             import requests
             res = requests.get(pic_url)
             if res and res.status_code == requests.codes.ok:
                 print('to save '+pic_path)
-                with open(pic_path, 'wb') as f:
-                    f.write(res.content)
-                    self.saved_counter = self.saved_counter+1
-                    print('finished '+str(self.saved_counter))
-                #end with
+                try:
+                    with open(pic_path, 'wb') as f:
+                        f.write(res.content)
+                        self.finished_pic_num = self.finished_pic_num+1
+                        #print('finished '+str(self.finished_pic_num))
+                    #end with
+                except IOError:
+                    print('save ' +pic_path+' failed')
+                    return false
+                #end try
             #end fi
         else:
             print(pic_path+' exists ')
+            return False
         #end if
+
+        return True
    #end def
-
-
-    def parse(self, response):
-        selector = HtmlXPathSelector(response)
-        title = selector.select('/html/head/title/text()')
-        print('title='+title.extract()[0])
-    #end def
 
 
     def __md5(self, str):

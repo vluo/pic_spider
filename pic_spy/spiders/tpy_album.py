@@ -9,15 +9,13 @@ from scrapy.spider import BaseSpider
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http import FormRequest
 import my_config.config
-from common import common_func
 
 
 class PocoSpider(BaseSpider):
-    start_time = 0
     name =  'tuchong_album'
     start_urls = []
-    allowed_domains = ["tuchong.com", 'photo.tuchong.com']
-    api_url = '/rest/2/sites/[uid]/posts?count=[num]&page=1&before_timestamp=0'
+    allowed_domains = ["dp.pconline.com.cn"]
+    api_url = '/rest/2/sites/[uid]/posts?count=100&page=1&before_timestamp=0'
     photo_host = 'https://photo.tuchong.com/[uid]/f/[pid].jpg'
     cur_page = 1
     page_size = 20
@@ -73,7 +71,6 @@ class PocoSpider(BaseSpider):
     ]
 
     def __init__(self):
-        self.start_time = time.time()
         self.save_path = os.path.join(self.save_path, self.name)
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
@@ -85,21 +82,6 @@ class PocoSpider(BaseSpider):
     def start_requests(self):
         initRequests = []
         for id in self.account_ids:
-            save_path = self.__save_path(self.account_ids[id], id)
-            log_file = self.__log_file(save_path)
-            to_crawl_album_num = 100
-            if os.path.exists(log_file):
-                print('>>>>crawl ['+self.account_ids[id]+'] has been done, pass<<<<')
-                continue
-            else:
-                if not os.path.exists(save_path):
-                    os.makedirs(save_path)
-                else:
-                    to_crawl_album_num = 5
-                # end if
-                common_func.add_log(log_file, '')
-            # end if
-            self.api_url = self.api_url.replace('[num]', str(to_crawl_album_num))
             request = FormRequest(self.account_ids[id]+''+self.api_url.replace('[uid]', id), callback=self.__parse_alum_list, formdata=None, headers=self.__getHeader())
             initRequests.append(request)
         #end for
@@ -108,14 +90,8 @@ class PocoSpider(BaseSpider):
 
 
     def close(self):
-        logs = []
-        logs.append(' took ' + str(time.time()-self.start_time) + ' seconds')
-        logs.append('finished ' + str(self.finished_album_num) + ' albums')
-        logs.append('finished ' + str(self.finished_pic_num)+' pics')
-        my_log = "\r\n".join(logs)
-        log_path = self.__log_file(os.path.realpath(__file__))
-        common_func.add_log(log_path, my_log)
-        print(my_log)
+        print('finished ' + str(self.finished_album_num) + ' albums')
+        print('finished ' + str(self.finished_pic_num)+' pics')
         print('>>>>>>>> close here <<<<<<')
     #end def
 
@@ -155,12 +131,13 @@ class PocoSpider(BaseSpider):
         # end if
         try:
             jsonObj = json.loads(response.text)
+            segs = parse.urlparse(response.url)
+            userHost = segs[1]
             if 'images' in jsonObj:
                 for image in jsonObj['images']:
                     pic_url = self.photo_host.replace('[uid]', str(image['user_id']))
                     pic_url = pic_url.replace('[pid]', str(image['img_id']))
-                    save_path = self.__save_path(response.url, str(image['user_id']))
-                    rs = self.__save_pic(pic_url, save_path)
+                    rs = self.__save_pic(pic_url, userHost+'.'.str(image['user_id']))
                     if rs:
                         self.finished_pic_num = self.finished_pic_num +1
                     #end if
@@ -187,27 +164,18 @@ class PocoSpider(BaseSpider):
         return self.headers
     #end def
 
-    def __save_path(self, url, uid):
-        userHost = parse.urlparse(url)[1]
-        if userHost == 'tuchong.com':
-            userHost = uid + '.' + userHost
-        #end if
-        return os.path.join(self.save_path, userHost)
-    #end def
-
-    def __save_pic(self, pic_url, save_path):
+    def __save_pic(self, pic_url, host):
         pic_name =  pic_url.split('/')[-1]
-        #save_path = os.path.join(self.save_path, host)
+        save_path = os.path.join(self.save_path, host)
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         # end if
-
         pic_path = os.path.join(save_path, pic_name)
         if not os.path.isfile(pic_path):
             import requests
             res = requests.get(pic_url)
             if res and res.status_code == requests.codes.ok:
-                print(str(self.finished_pic_num+1)+'  to save '+pic_path)
+                print('to save '+pic_path)
                 try:
                     with open(pic_path, 'wb') as f:
                         f.write(res.content)
@@ -242,11 +210,6 @@ class PocoSpider(BaseSpider):
         jsonStr = self.__md5("poco_" + jsonStr + "_app") #md5
         #    n = n.substr(5, 19);
         return jsonStr[5:24]
-    #end def
-
-    def __log_file(self, save_path):
-        dateStr = time.strftime('%Y%m%d', time.localtime())
-        return os.path.join(save_path, str(dateStr) + '.log')
     #end def
 
 #end class

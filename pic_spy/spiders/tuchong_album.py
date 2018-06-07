@@ -220,29 +220,12 @@ class PocoSpider(BaseSpider):
                 #end try
             #end fi
         else:
-            print(pic_path+' exists ')
+            #print(pic_path+' exists ')
             return False
         #end if
 
         return True
    #end def
-
-
-    def __md5(self, str):
-        # 创建md5对象
-        hl = hashlib.md5()
-        # Tips   此处必须声明encode    若写法为hl.update(str)  报错为： Unicode-objects must be encoded before hashing
-        hl.update(str.encode(encoding='utf-8'))
-        return hl.hexdigest()
-    #end def
-
-    def __sign_code(self, param):
-        return 'a2a4d025aa8fe2dbf60'#'841262702a1b4ce4183'
-        jsonStr = json.dumps(param);
-        jsonStr = self.__md5("poco_" + jsonStr + "_app") #md5
-        #    n = n.substr(5, 19);
-        return jsonStr[5:24]
-    #end def
 
     def __log_file(self, save_path):
         dateStr = time.strftime('%Y%m%d', time.localtime())

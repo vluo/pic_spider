@@ -26,5 +26,16 @@ artist_list = {
     '243731':'https://jasonzou.tuchong.com',
     '53023':'https://secret.tuchong.com',
     '336885':'https://tuchong.com',
-    '445081':'https://tuchong.com'
+    '445081':'https://tuchong.com',
+    '1107056':'https://tuchong.com',
+    '275736':'https://suyi.tuchong.com',
+    '1314529':'https://tuchong.com',
+    '1064195':'https://daddy.tuchong.com',
+    '1046081':'https://tuchong.com',
+    '3326940':'https://3photography.tuchong.com',
+    '1332533':'https://tuchong.com',
+    '288782':'https://littledemon.tuchong.com',
+    '1039253':'https://tuchong.com',
+    '3505293':'https://tuchong.com',
+    '3522380':'https://tuchong.com'
 }

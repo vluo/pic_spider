@@ -75,11 +75,11 @@ class VBase(BaseSpider):
 
     def close(self):
         logs = []
-        logs.append(' took ' + str(time.time()-self.start_time) + ' seconds')
+        logs.append('took ' + str(time.time()-self.start_time) + ' seconds')
         logs.append('finished ' + str(self.finished_album_num) + ' albums')
         logs.append('finished ' + str(self.finished_pic_num)+' pics')
         my_log = "\r\n".join(logs)
-        log_file = self._log_file(self.log_path)
+        log_file = self._log_file()
         print(log_file)
         common_func.add_log(log_file, my_log)
         print(my_log)
@@ -95,10 +95,15 @@ class VBase(BaseSpider):
     #end def
 
 
-    def _log_file(self, save_path):
+    def _log_file(self):
         dateStr = time.strftime('%Y%m%d', time.localtime())
         return os.path.join(self.log_path, str(dateStr)+'['+self.name+'].log')
     # end def
+
+    def _daily_log_file(self, save_path):
+        dateStr = time.strftime('%Y%m%d', time.localtime())
+        return os.path.join(save_path, str(dateStr) + '.log')
+    #end def
 
     def _parseHost(self, url):
         segs = parse.urlparse(url)

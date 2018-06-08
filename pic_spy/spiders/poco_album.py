@@ -30,7 +30,7 @@ class PocoSpider(VBase.VBase):
     def start_requests(self):
         initRequests = []
         for id in self.account_ids:
-            log_file = self._log_file(self.__save_path(id))
+            log_file = self._daily_log_file(self.__save_path(id))
             print (log_file)
             if os.path.exists(log_file):
                 print('>>>>crawl [' + id + '] has been done, pass<<<<')
@@ -83,7 +83,7 @@ class PocoSpider(VBase.VBase):
 
     def __parse_alum_list(self, response):
         if response.status != 200 or response.text == '':
-            print(str(response.status) + ' >>>>>>>>> ' + response.text)
+            print(str(response.status) + ' >>>>>>>>> ' + response.url)
             return None
         # end if
         album_num = 0;
@@ -95,7 +95,7 @@ class PocoSpider(VBase.VBase):
                 for work in jsonObj['data']['list']:
                     cur_user_id = int(work['user_id'])
                     #albumUrls.append('http://www.poco.cn/works/detail?works_id='+str(work['works_id']))
-                    yield FormRequest('http://www.poco.cn/works/detail?works_id='+str(work['works_id'])+'&['+str(cur_user_id)+']', callback=self.__parse_album)#, formdata=None, headers=self.__getHeader())   #
+                    yield FormRequest('http://www.poco.cn/works/detail?works_id='+str(work['works_id'])+'&uid='+str(cur_user_id), callback=self.__parse_album)#, formdata=None, headers=self._getHeader())   #
                     album_num = album_num +1
                 #end for
             else:
@@ -114,7 +114,7 @@ class PocoSpider(VBase.VBase):
 
     def __parse_album(self, response):
         if response.status != 200 or response.text == '':
-            print(str(response.status) + ' >>>>>>>>> ' + response.text)
+            print(str(response.status) + ' >>>>>>>>> ' + response.url)
             return None
         # end if
 
@@ -122,7 +122,7 @@ class PocoSpider(VBase.VBase):
         img_tags = selector.xpath('//img')
         #print(' img tags num: ' + str(len(img_tags)))
 
-        matches = re.search(r'\[(\S+)\]', response.url)
+        matches = re.search(r'uid=(\S+)', response.url)
         save_path  = self.save_path
         if matches:
             user_id = matches.group(1)

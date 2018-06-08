@@ -35,10 +35,6 @@ class PocoSpider(VBase.VBase):
 
     def __init__(self):
         super().__init__()
-        self.save_path = os.path.join(self.save_path, self.name)
-        if not os.path.exists(self.save_path):
-            os.makedirs(self.save_path)
-        # end if
         self.account_ids = my_config.config.artist_list
     #end def
 
@@ -46,7 +42,7 @@ class PocoSpider(VBase.VBase):
         initRequests = []
         for id in self.account_ids:
             save_path = self.__save_path(self.account_ids[id], id)
-            log_file = self._log_file(save_path)
+            log_file = self._daily_log_file(save_path)
             to_crawl_album_num = 100
             if os.path.exists(log_file):
                 print('>>>>crawl ['+self.account_ids[id]+'] has been done, pass<<<<')
@@ -69,7 +65,7 @@ class PocoSpider(VBase.VBase):
 
     def __parse_alum_list(self, response):
         if response.status != 200 or response.text == '':
-            print('request error >> '+str(response.status) + ' >>>>>>>>> ')
+            print('request error >> '+str(response.status) + ' >>>>>>>>> '+response.url)
             return None
         # end if
         album_num = 0;

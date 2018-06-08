@@ -1,98 +1,45 @@
 import os, sys
+import time, random
 import json
-import time
 import re
 import random
 import hashlib
-from scrapy.spider import BaseSpider
-from scrapy.selector import HtmlXPathSelector
-from scrapy.http import FormRequest
 
-class PocoSpider(BaseSpider):
-    name =  'poco_album_spider'
+from scrapy.http import FormRequest
+from scrapy.selector import HtmlXPathSelector
+
+from common import VBase
+from common import common_func
+import my_config.config
+
+class PocoSpider(VBase.VBase):
+    name =  'poco_album'
     start_urls = []
     allowed_domains = ["poco.cn", 'pocoimg.cn']
     api_url = "http://web-api.poco.cn/v1_1/space/get_user_works_list"
     cur_page = 1
     page_size = 18
     my_poco_id = 173522648
-    account_ids = {
-    	'174574302':'f2a37d9659d2fb48085',
-    	'174572931':'406ef59705efb4e425f',
-    	'177176218':'9229061252cccadb18f',
-    	'173388816':'6b5b2f8292b593118ad',
-    	'174848104':'3e1daaec63f772edfcc',
-    	'185652848':'8e39023858be8d32e21',
-    	'200513958':'77c2259120872addd25',
-    	'63443172':'35aa80b13d3ad3d5d4e',
-    	'178957211':'5575cdfba172fd87a46',
-    	'174079515':'3f24a5c860313797d4d',
-    	'19430718':'0ce08eed59bd0cef426',
-    	'67593620':'054a8f14068e0c51998',
-    	'3417570':'ced79f0568fa7cadaa1',
-    	'174730832':'90d1fe0c81a11a1f17c',
-    	'66546564':'1177c50fe7622b99154'
-    }
-    save_path = '/home/python/pic_spy/albums'
-    saved_counter = 0
-    headers={
-        "User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:49.0) Gecko/20100101 Firefox/49.0",
-        "Origin":"http://www.poco.cn",
-        "Referer":"http://www.poco.cn /user/user_center?user_id=173522648",
-        "Host":"web-api.poco.cn",
-        "Connection":"Keep-Alive",
-        "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8"
-    }
-    user_agent_list = [
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 "
-        "(KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
-        "Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 "
-        "(KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 "
-        "(KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6",
-        "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.6 "
-        "(KHTML, like Gecko) Chrome/20.0.1090.0 Safari/536.6",
-        "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.1 "
-        "(KHTML, like Gecko) Chrome/19.77.34.5 Safari/537.1",
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.5 "
-        "(KHTML, like Gecko) Chrome/19.0.1084.9 Safari/536.5",
-        "Mozilla/5.0 (Windows NT 6.0) AppleWebKit/536.5 "
-        "(KHTML, like Gecko) Chrome/19.0.1084.36 Safari/536.5",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 "
-        "(KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/536.3 "
-        "(KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/536.3 "
-        "(KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 "
-        "(KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 "
-        "(KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 "
-        "(KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 "
-        "(KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.3 "
-        "(KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3",
-        "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 "
-        "(KHTML, like Gecko) Chrome/19.0.1061.0 Safari/536.3",
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 "
-        "(KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24",
-        "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 "
-        "(KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24"
-    ]
+    account_ids = None
 
     def __init__(self):
-        if not os.path.exists(self.save_path):
-            os.makedirs(self.save_path)
-        # end if
         super().__init__()
+        self.account_ids = my_config.config.poco_account_ids
     #end def
 
     def start_requests(self):
         initRequests = []
         for id in self.account_ids:
-            request = FormRequest(self.api_url, callback=self.__parse_alum_list, formdata=self.__formData(id, self.cur_page), headers=self.__getHeader())
+            log_file = self._log_file(self.__save_path(id))
+            print (log_file)
+            if os.path.exists(log_file):
+                print('>>>>crawl [' + id + '] has been done, pass<<<<')
+                continue
+            else:
+                 common_func.add_log(log_file, '')
+            # end if
+
+            request = FormRequest(self.api_url, callback=self.__parse_alum_list, formdata=self.__formData(id, self.cur_page), headers=self._getHeader())
             initRequests.append(request)
         #end for
         return initRequests
@@ -144,10 +91,11 @@ class PocoSpider(BaseSpider):
             jsonObj = json.loads(response.text)
             cur_user_id = 0
             if 'data' in jsonObj and 'list' in jsonObj['data']:
+                self.finished_album_num = self.finished_album_num + len(jsonObj['data']['list'])
                 for work in jsonObj['data']['list']:
                     cur_user_id = int(work['user_id'])
                     #albumUrls.append('http://www.poco.cn/works/detail?works_id='+str(work['works_id']))
-                    yield FormRequest('http://www.poco.cn/works/detail?works_id='+str(work['works_id']), callback=self.__parse_album)#, formdata=None, headers=self.__getHeader())   #
+                    yield FormRequest('http://www.poco.cn/works/detail?works_id='+str(work['works_id'])+'&['+str(cur_user_id)+']', callback=self.__parse_album)#, formdata=None, headers=self.__getHeader())   #
                     album_num = album_num +1
                 #end for
             else:
@@ -163,13 +111,6 @@ class PocoSpider(BaseSpider):
         print (response.url+' >>> to crawl '+str(album_num)+' albums')
     #end def
 
-    def __getHeader(self):
-        ua = random.choice(self.user_agent_list)
-        if ua:
-            self.headers['User-Agent'] = ua
-        #end if
-        return self.headers
-    #end def
 
     def __parse_album(self, response):
         if response.status != 200 or response.text == '':
@@ -181,40 +122,31 @@ class PocoSpider(BaseSpider):
         img_tags = selector.xpath('//img')
         #print(' img tags num: ' + str(len(img_tags)))
 
+        matches = re.search(r'\[(\S+)\]', response.url)
+        save_path  = self.save_path
+        if matches:
+            user_id = matches.group(1)
+            save_path = self.__save_path(user_id)
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
+            #end if
+        else:
+            print('>>>empty user_id<<<<')
+            return
+        #end if
+
         for img in img_tags:
             html = img.extract()
             matches = re.search(r'data-src="(\S+)"', html)
             if matches:
-                self.__save_pic(matches.group(1).replace('//', 'http://'))
+                self._save_pic(matches.group(1).replace('//', 'http://'), save_path)
         #end
     #end def
 
-    def __save_pic(self, pic_url):
-        pic_name =  pic_url.split('/')[-1]
-        pic_path = os.path.join(self.save_path, pic_name)
-        if not os.path.isfile(pic_path):
-            import requests
-            res = requests.get(pic_url)
-            if res and res.status_code == requests.codes.ok:
-                print('to save '+pic_path)
-                with open(pic_path, 'wb') as f:
-                    f.write(res.content)
-                    self.saved_counter = self.saved_counter+1
-                    print('finished '+str(self.saved_counter))
-                #end with
-            #end fi
-        else:
-            print(pic_path+' exists ')
-        #end if
-   #end def
 
-
-    def parse(self, response):
-        selector = HtmlXPathSelector(response)
-        title = selector.select('/html/head/title/text()')
-        print('title='+title.extract()[0])
+    def __save_path(self, uid):
+        return os.path.join(self.save_path, str(uid))
     #end def
-
 
     def __md5(self, str):
         # 创建md5对象

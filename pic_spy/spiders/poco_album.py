@@ -3,7 +3,6 @@ import time, random
 import json
 import re
 import random
-import hashlib
 
 from scrapy.http import FormRequest
 from scrapy.selector import HtmlXPathSelector
@@ -33,8 +32,9 @@ class PocoSpider(VBase.VBase):
             log_file = self._daily_log_file(self.__save_path(id))
             print (log_file)
             if os.path.exists(log_file):
-                print('>>>>crawl [' + id + '] has been done, pass<<<<')
-                continue
+                pass
+                #print('>>>>crawl [' + id + '] has been done, pass<<<<')
+                #continue
             else:
                  common_func.add_log(log_file, '')
             # end if
@@ -83,6 +83,7 @@ class PocoSpider(VBase.VBase):
 
     def __parse_alum_list(self, response):
         if response.status != 200 or response.text == '':
+            self._add_log(response.url + ' request failed ' + str(response.status))
             print(str(response.status) + ' >>>>>>>>> ' + response.url)
             return None
         # end if
@@ -94,11 +95,16 @@ class PocoSpider(VBase.VBase):
                 self.finished_album_num = self.finished_album_num + len(jsonObj['data']['list'])
                 for work in jsonObj['data']['list']:
                     cur_user_id = int(work['user_id'])
-                    #albumUrls.append('http://www.poco.cn/works/detail?works_id='+str(work['works_id']))
-                    yield FormRequest('http://www.poco.cn/works/detail?works_id='+str(work['works_id'])+'&uid='+str(cur_user_id), callback=self.__parse_album)#, formdata=None, headers=self._getHeader())   #
+                    albumUrl = 'http://www.poco.cn/works/detail?works_id='+str(work['works_id'])+'&uid='+str(cur_user_id)
+                    if self._md5(albumUrl) in self.done_list:
+                        print('>>>>crawl [' + post['post_id'] + '] has been done, pass<<<<')
+                    # end if
+
+                    yield FormRequest(albumUrl, callback=self.__parse_album)#, formdata=None, headers=self._getHeader())   #
                     album_num = album_num +1
                 #end for
             else:
+                self._add_log(response.url+' parse json failed')
                 print('request api error: '+jsonObj['message'])
             #end if
             if cur_user_id and 'has_more' in jsonObj and jsonObj['has_more']:
@@ -106,6 +112,7 @@ class PocoSpider(VBase.VBase):
                 #yield FormRequest(api_url, callback=self.__parse_alum_list, formdata=self.__formData(cur_user_id, self.cur_page), headers=self.headers)
             #end if
         except json.decoder.JSONDecodeError:
+            self._add_log(response.url + ' parse json failed')
             print('json error')
         #
         print (response.url+' >>> to crawl '+str(album_num)+' albums')
@@ -114,6 +121,7 @@ class PocoSpider(VBase.VBase):
 
     def __parse_album(self, response):
         if response.status != 200 or response.text == '':
+            self._add_log(response.url + ' request failed '+str(response.status))
             print(str(response.status) + ' >>>>>>>>> ' + response.url)
             return None
         # end if
@@ -135,6 +143,8 @@ class PocoSpider(VBase.VBase):
             return
         #end if
 
+        self._append_done_list(self._md5(response.url))
+
         for img in img_tags:
             html = img.extract()
             matches = re.search(r'data-src="(\S+)"', html)
@@ -148,13 +158,6 @@ class PocoSpider(VBase.VBase):
         return os.path.join(self.save_path, str(uid))
     #end def
 
-    def __md5(self, str):
-        # 创建md5对象
-        hl = hashlib.md5()
-        # Tips   此处必须声明encode    若写法为hl.update(str)  报错为： Unicode-objects must be encoded before hashing
-        hl.update(str.encode(encoding='utf-8'))
-        return hl.hexdigest()
-    #end def
 
     def __sign_code(self, param):
         return 'a2a4d025aa8fe2dbf60'#'841262702a1b4ce4183'

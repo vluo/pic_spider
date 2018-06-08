@@ -1,5 +1,6 @@
 import os, sys
 import time, random
+import hashlib
 from urllib import parse
 from scrapy.spider import BaseSpider
 from scrapy.http import FormRequest
@@ -12,6 +13,7 @@ class VBase(BaseSpider):
     save_path = ''
     finished_album_num = 0
     finished_pic_num = 0
+    done_list = []
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:49.0) Gecko/20100101 Firefox/49.0",
         "Origin": "http://www.poco.cn",
@@ -70,6 +72,7 @@ class VBase(BaseSpider):
         if not os.path.exists(self.log_path):
             os.makedirs(self.log_path)
         # end if
+        self._load_done_list()
         super().__init__()
     #end def
 
@@ -81,7 +84,7 @@ class VBase(BaseSpider):
         my_log = "\r\n".join(logs)
         log_file = self._log_file()
         print(log_file)
-        common_func.add_log(log_file, my_log)
+        self._add_log(my_log)
         print(my_log)
         print('>>>>>>>> close here <<<<<<')
     #end def
@@ -94,6 +97,10 @@ class VBase(BaseSpider):
         return self.headers
     #end def
 
+
+    def _add_log(self, lines):
+        common_func.add_log(self._log_file(), lines, 'a+')
+    #end def
 
     def _log_file(self):
         dateStr = time.strftime('%Y%m%d', time.localtime())
@@ -131,6 +138,33 @@ class VBase(BaseSpider):
 
     def _save_path(self):
         return os.path.dirname(__file__)
+    #end def
+
+    def _done_list_file(self):
+        return os.path.join(self.save_path, 'done-list.log')
+    #end def
+
+    def _load_done_list(self):
+        doneListFile = self._done_list_file()
+        if os.path.exists(doneListFile):
+            with open(doneListFile, 'r', encoding='utf-8') as file:
+                contents = file.readlines()
+                self.done_list = contents.split("\r\n")
+            #end with
+        #end if
+    #end def
+
+    def _append_done_list(self, item):
+        print('done list >>>>>>>>>>>>>>>>>>>>>'+self._done_list_file())
+        common_func.add_log(self._done_list_file(), item+"\r\n", 'a+')
+    #end def
+
+    def _md5(self, str):
+        # 创建md5对象
+        hl = hashlib.md5()
+        # Tips   此处必须声明encode    若写法为hl.update(str)  报错为： Unicode-objects must be encoded before hashing
+        hl.update(str.encode(encoding='utf-8'))
+        return hl.hexdigest()
     #end def
 
 #end base

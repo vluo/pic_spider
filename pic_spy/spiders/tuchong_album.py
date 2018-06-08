@@ -4,7 +4,6 @@ import json
 import re
 from urllib import parse
 import random
-import hashlib
 from scrapy.http import FormRequest
 from scrapy.selector import HtmlXPathSelector
 import my_config.config
@@ -45,8 +44,9 @@ class PocoSpider(VBase.VBase):
             log_file = self._daily_log_file(save_path)
             to_crawl_album_num = 100
             if os.path.exists(log_file):
-                print('>>>>crawl ['+self.account_ids[id]+'] has been done, pass<<<<')
-                continue
+                pass
+                #print('>>>>crawl ['+self.account_ids[id]+'] has been done, pass<<<<')
+                #continue
             else:
                 if not os.path.exists(save_path):
                     os.makedirs(save_path)
@@ -65,6 +65,7 @@ class PocoSpider(VBase.VBase):
 
     def __parse_alum_list(self, response):
         if response.status != 200 or response.text == '':
+            self._add_log(response.url + ' request failed ' + str(response.status))
             print('request error >> '+str(response.status) + ' >>>>>>>>> '+response.url)
             return None
         # end if
@@ -76,10 +77,17 @@ class PocoSpider(VBase.VBase):
             if 'post_list' in jsonObj:
                 print(response.url+' >>> to crawl '+str(len(jsonObj['post_list']))+' albums')
                 for post in jsonObj['post_list']:
-                    yield FormRequest(host+'/rest/posts/'+post['post_id'], callback=self.__parse_album_pics, formdata=None, headers=self._getHeader())   #
+                    post['post_id'] = str(post['post_id'])
+                    albumUrl = host + '/rest/posts/' + post['post_id']
+                    if self._md5(albumUrl) in self.done_list:
+                        print('>>>>crawl [' + post['post_id'] + '] has been done, pass<<<<')
+                    #end if
+
+                    yield FormRequest(albumUrl, callback=self.__parse_album_pics, formdata=None, headers=self._getHeader())   #
                     self.finished_album_num = self.finished_album_num + 1
                 #end for
             else:
+                self._add_log('>>>> request api error: <<<<'+response.url)
                 print('>>>> request api error: <<<<'+response.url)
             #end if
             if cur_user_id and 'has_more' in jsonObj and jsonObj['has_more']:
@@ -87,12 +95,14 @@ class PocoSpider(VBase.VBase):
                 #yield FormRequest(api_url, callback=self.__parse_alum_list, formdata=self.__formData(cur_user_id, self.cur_page), headers=self.headers)
             #end if
         except json.decoder.JSONDecodeError:
+            self._add_log(response.url + ' parse json failed')
             print('json error')
         #
     #end def
 
     def __parse_album_pics(self, response):
         if response.status != 200 or response.text == '':
+            self._add_log(response.url + ' request failed ' + str(response.status))
             print('request error >> '+str(response.status) + ' >>>>>>>>> ')
             return None
         # end if
@@ -108,10 +118,13 @@ class PocoSpider(VBase.VBase):
                         self.finished_pic_num = self.finished_pic_num +1
                     #end if
                 #end for
+                self._append_done_list(self._md5(response.url))
             else:
+                self._add_log(response.url + ' parse json failed')
                 print('>>>  request api error: <<<<<'+response.url)
             #end if
         except json.decoder.JSONDecodeError:
+            self._add_log(response.url + ' parse json failed')
             print('>>>>json error<<<<<<')
         #
     #end def

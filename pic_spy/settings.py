@@ -14,16 +14,20 @@ BOT_NAME = 'pic_spy'
 SPIDER_MODULES = ['pic_spy.spiders']
 NEWSPIDER_MODULE = 'pic_spy.spiders'
 
+DOWNLOAD_TIMEOUT = 30
+RETRY_ENABLED = False
+#RETRY_TIMES = 1
+
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'pic_spy (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 16
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'ERROR'
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay

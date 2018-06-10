@@ -1,5 +1,5 @@
-save_path = '/home/python/pic_spy/albums'
-log_path = '/home/python/pic_spy/logs'
+save_path = '/home/work space/python/pic_spider/albums'
+log_path = '/home/work space/python/pic_spider/logs'
 artist_list = {
     '362174':'https://jiran.tuchong.com',
     '1177577':'https://gongzichangan.tuchong.com',

@@ -79,8 +79,9 @@ class PocoSpider(VBase.VBase):
                 for post in jsonObj['post_list']:
                     post['post_id'] = str(post['post_id'])
                     albumUrl = host + '/rest/posts/' + post['post_id']
-                    if self._md5(albumUrl) in self.done_list:
+                    if self._md5(albumUrl)+self._sysLineSymbol() in self.done_list:
                         print('>>>>crawl [' + post['post_id'] + '] has been done, pass<<<<')
+                        continue
                     #end if
 
                     yield FormRequest(albumUrl, callback=self.__parse_album_pics, formdata=None, headers=self._getHeader())   #

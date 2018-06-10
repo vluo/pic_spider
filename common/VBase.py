@@ -1,4 +1,5 @@
 import os, sys
+import platform
 import time, random
 import hashlib
 from urllib import parse
@@ -83,8 +84,7 @@ class VBase(BaseSpider):
         logs.append('finished ' + str(self.finished_pic_num)+' pics')
         my_log = "\r\n".join(logs)
         log_file = self._log_file()
-        print(log_file)
-        self._add_log(my_log)
+        self._add_log("\r\n["+str(time.strftime('%Y%m%d', time.localtime()))+']'+my_log+"\r\n")
         print(my_log)
         print('>>>>>>>> close here <<<<<<')
     #end def
@@ -123,12 +123,19 @@ class VBase(BaseSpider):
         if not os.path.isfile(pic_path):
             import requests
             res = requests.get(pic_url)
-            if res and res.status_code == requests.codes.ok:
+            if res and res.status_code == requests.codes.ok and res.content:
                 print(str(self.finished_pic_num) + ' to save ' + pic_path)
-                with open(pic_path, 'wb') as f:
-                    f.write(res.content)
-                    self.finished_pic_num = self.finished_pic_num + 1
-                    # end with
+                try:
+                    with open(pic_path, 'wb') as f:
+                        f.write(res.content)
+                        self.finished_pic_num = self.finished_pic_num + 1
+                        # end with
+                except IOError:
+                    print('save '+pic_path+' failed')
+                    return
+                #end try
+            else:
+                print('request ' + pic_url + ' failed')
             # end fi
         else:
             print(pic_path + ' exists ')
@@ -148,9 +155,11 @@ class VBase(BaseSpider):
         doneListFile = self._done_list_file()
         if os.path.exists(doneListFile):
             with open(doneListFile, 'r', encoding='utf-8') as file:
-                contents = file.readlines()
-                self.done_list = contents.split("\r\n")
-            #end with
+                self.done_list = file.readlines()
+                #self.done_list = contents.split("\r\n")
+            #end wit
+        else:
+            print(doneListFile+' not found')
         #end if
     #end def
 
@@ -165,6 +174,16 @@ class VBase(BaseSpider):
         # Tips   此处必须声明encode    若写法为hl.update(str)  报错为： Unicode-objects must be encoded before hashing
         hl.update(str.encode(encoding='utf-8'))
         return hl.hexdigest()
+    #end def
+
+    def _sysLineSymbol(self):
+        sysstr = platform.system()
+        if (sysstr == "Windows"):
+            return "\r\n"
+        elif (sysstr == "Linux"):
+            return "\n"
+        else:
+            return "\r"
     #end def
 
 #end base

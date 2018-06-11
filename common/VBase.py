@@ -99,7 +99,7 @@ class VBase(BaseSpider):
 
 
     def _add_log(self, lines):
-        common_func.add_log(self._log_file(), lines, 'a+')
+        common_func.add_log(self._log_file(), lines+"\r\n", 'a+')
     #end def
 
     def _log_file(self):

@@ -97,7 +97,7 @@ class PocoSpider(VBase.VBase):
                     cur_user_id = int(work['user_id'])
                     albumUrl = 'http://www.poco.cn/works/detail?works_id='+str(work['works_id'])+'&uid='+str(cur_user_id)
                     if self._md5(albumUrl)+self._sysLineSymbol() in self.done_list:
-                        print('>>>>crawl [' + post['post_id'] + '] has been done, pass<<<<')
+                        print('>>>>crawl [' + str(work['works_id']) + '] has been done, pass<<<<')
                         continue
                     # end if
 

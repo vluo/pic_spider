@@ -121,11 +121,11 @@ class PocoSpider(VBase.VBase):
                 #end for
                 self._append_done_list(self._md5(response.url))
             else:
-                self._add_log(response.url + ' parse json failed')
+                self._add_log(response.url + " parse json failed")
                 print('>>>  request api error: <<<<<'+response.url)
             #end if
         except json.decoder.JSONDecodeError:
-            self._add_log(response.url + ' parse json failed')
+            self._add_log(response.url + " parse json failed")
             print('>>>>json error<<<<<<')
         #
     #end def

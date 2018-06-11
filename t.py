@@ -1,9 +1,9 @@
 import os, sys
 import json
-import  hashlib
+import hashlib
 import execjs
 
-js ='''
+js = '''
 	function r(n, t) {
 		var r = (65535 & n) + (65535 & t),
 			e = (n >> 16) + (t >> 16) + (r >> 16);
@@ -72,8 +72,9 @@ js ='''
 	function A(n) {
 		return v(C(n))
 	}
-	'''
+'''
 
+print(js)
 
 str = '{"version":"1.1.0","app_name":"poco_photography_web","os_type":"weixin","is_enc":0,"env":"prod","ctime":1528628815464,"param":{"user_id":0,"visited_user_id":66546564,"keyword":"","year":0,"length":18,"start":0},"sign_code":"b7df15fc5ccf64e9fa3"}'
 jsonObj = json.loads(str)

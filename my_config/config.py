@@ -72,7 +72,8 @@ poco_account_ids = {
         '173636313':'ff762eefdedf489a139',
         '51955220':'850166acf1e16e9de87',
         '178265607':'649c119e39029ba65cc',
-        '179593166':'284acce00d1dfd74c75'
+        '179593166':'284acce00d1dfd74c75',
+        '55708170':['0f1e7705e06c9cc75de', '9b337c5c595ed4ccedb']
 }
 
 tpy_blog_urls = [

@@ -29,6 +29,7 @@ class PocoSpider(VBase.VBase):
     def start_requests(self):
         initRequests = []
         for id in self.account_ids:
+            self.cur_page = 1
             log_file = self._daily_log_file(self.__save_path(id))
             print (log_file)
             if os.path.exists(log_file):
@@ -38,8 +39,14 @@ class PocoSpider(VBase.VBase):
             else:
                  common_func.add_log(log_file, '')
             # end if
+            if not isinstance(self.account_ids[id], list):
+                self.account_ids[id] = [self.account_ids[id]]
+            #end if
+            for authCode in self.account_ids[id]:
+                request = FormRequest(self.api_url, callback=self.__parse_alum_list, formdata=self.__formData(id, self.cur_page), headers=self._getHeader())
+                self.cur_page = self.cur_page + 1
+            #end for
 
-            request = FormRequest(self.api_url, callback=self.__parse_alum_list, formdata=self.__formData(id, self.cur_page), headers=self._getHeader())
             initRequests.append(request)
         #end for
         return initRequests
@@ -71,10 +78,10 @@ class PocoSpider(VBase.VBase):
         }
 
         header = self.headers
-        header['Referer'] = header['Referer'] + "" + str(uid)
+        header['Referer'] = "http://www.poco.cn/user/user_center?user_id=" + str(uid)
         param['visited_user_id'] = int(uid)
         res['param'] = param  # ['visited_user_id'] = id
-        res['sign_code'] = self.account_ids[uid]  #self.__sign_code(param)
+        res['sign_code'] = self.account_ids[uid][page-1]  #self.__sign_code(param)
         formdata['req'] = json.dumps(res)
 
         return formdata

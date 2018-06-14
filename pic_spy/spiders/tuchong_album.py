@@ -5,6 +5,7 @@ import re
 from urllib import parse
 import random
 from scrapy.http import FormRequest
+from scrapy.http import Request
 from scrapy.selector import HtmlXPathSelector
 import my_config.config
 
@@ -12,7 +13,7 @@ from common import VBase
 from common import common_func
 
 
-class PocoSpider(VBase.VBase):
+class TuchongSpider(VBase.VBase):
     name =  'tuchong_album'
     start_urls = []
     allowed_domains = ["tuchong.com", 'photo.tuchong.com']
@@ -57,7 +58,7 @@ class PocoSpider(VBase.VBase):
             # end if
 
             self.api_url = self.api_url.replace('[num]', str(to_crawl_album_num))
-            request = FormRequest(self.account_ids[id]+''+self.api_url.replace('[uid]', id), callback=self.__parse_alum_list, formdata=None, headers=self._getHeader())
+            request = Request(self.account_ids[id]+''+self.api_url.replace('[uid]', id), callback=self.__parse_alum_list, method='GET', headers=self._getHeader())
             initRequests.append(request)
         #end for
         return initRequests
@@ -79,13 +80,11 @@ class PocoSpider(VBase.VBase):
                 for post in jsonObj['post_list']:
                     post['post_id'] = str(post['post_id'])
                     albumUrl = host + '/rest/posts/' + post['post_id']
-                    if self._md5(albumUrl)+self._sysLineSymbol() in self.done_list:
-                        print('>>>>crawl [' + post['post_id'] + '] has been done, pass<<<<')
+                    if self._isDoubleCrawled(albumUrl):
                         continue
                     #end if
 
-                    yield FormRequest(albumUrl, callback=self.__parse_album_pics, formdata=None, headers=self._getHeader())   #
-                    self.finished_album_num = self.finished_album_num + 1
+                    yield Request(albumUrl, callback=self.__parse_album_pics, method='GET', headers=self._getHeader())   #url, callback=None, method='GET', headers=None
                 #end for
             else:
                 self._add_log('>>>> request api error: <<<<'+response.url)
@@ -119,7 +118,8 @@ class PocoSpider(VBase.VBase):
                         self.finished_pic_num = self.finished_pic_num +1
                     #end if
                 #end for
-                self._append_done_list(self._md5(response.url))
+                self._append_done_list(response.url)
+                self.finished_album_num = self.finished_album_num + 1
             else:
                 self._add_log(response.url + " parse json failed")
                 print('>>>  request api error: <<<<<'+response.url)

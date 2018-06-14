@@ -67,5 +67,20 @@ poco_account_ids = {
         '174316516':'2a9836876849fa80820',
         '57837318':'6da5df91945bf9bc3e5',
         '52367905':'88806287fd63c6159e1',
-        '52967121':'7c3e4024ef8c3c8223a'
+        '52967121':'7c3e4024ef8c3c8223a',
+        '44988233':'01d974a5aa0638ae88e',
+        '173636313':'ff762eefdedf489a139',
+        '51955220':'850166acf1e16e9de87',
+        '178265607':'649c119e39029ba65cc',
+        '179593166':'284acce00d1dfd74c75'
 }
+
+tpy_blog_urls = [
+    'http://dp.pconline.com.cn/8806083',
+    'http://dp.pconline.com.cn/33941406',
+    'http://dp.pconline.com.cn/8640908,'
+    'http://dp.pconline.com.cn/31891740',
+    'http://dp.pconline.com.cn/34394448',
+    'http://dp.pconline.com.cn/15660510',
+    'http://dp.pconline.com.cn/45106808'
+]

@@ -92,17 +92,16 @@ class PocoSpider(VBase.VBase):
             jsonObj = json.loads(response.text)
             cur_user_id = 0
             if 'data' in jsonObj and 'list' in jsonObj['data']:
-                self.finished_album_num = self.finished_album_num + len(jsonObj['data']['list'])
                 for work in jsonObj['data']['list']:
                     cur_user_id = int(work['user_id'])
                     albumUrl = 'http://www.poco.cn/works/detail?works_id='+str(work['works_id'])+'&uid='+str(cur_user_id)
-                    if self._md5(albumUrl)+self._sysLineSymbol() in self.done_list:
-                        print('>>>>crawl [' + str(work['works_id']) + '] has been done, pass<<<<')
+                    if self._isDoubleCrawled(albumUrl):
                         continue
                     # end if
 
                     yield FormRequest(albumUrl, callback=self.__parse_album)#, formdata=None, headers=self._getHeader())   #
                     album_num = album_num +1
+                    self.finished_album_num = self.finished_album_num + len(jsonObj['data']['list'])
                 #end for
             else:
                 self._add_log(response.url+' parse json failed')
@@ -127,10 +126,6 @@ class PocoSpider(VBase.VBase):
             return None
         # end if
 
-        selector = HtmlXPathSelector(response)
-        img_tags = selector.xpath('//img')
-        #print(' img tags num: ' + str(len(img_tags)))
-
         matches = re.search(r'uid=(\S+)', response.url)
         save_path  = self.save_path
         if matches:
@@ -144,8 +139,11 @@ class PocoSpider(VBase.VBase):
             return
         #end if
 
-        self._append_done_list(self._md5(response.url))
+        self._append_done_list(response.url)
 
+        selector = HtmlXPathSelector(response)
+        img_tags = selector.xpath('//img')
+        # print(' img tags num: ' + str(len(img_tags)))
         for img in img_tags:
             html = img.extract()
             matches = re.search(r'data-src="(\S+)"', html)

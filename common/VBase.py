@@ -3,23 +3,24 @@ import platform
 import time, random
 import hashlib
 from urllib import parse
-from scrapy.spider import BaseSpider
+from scrapy.spiders import Spider
 from scrapy.http import FormRequest
 
 from common import common_func
 import my_config.config
 
-class VBase(BaseSpider):
+class VBase(Spider):
     start_time = 0
     save_path = ''
     finished_album_num = 0
     finished_pic_num = 0
+    finished_album_names = []
     done_list = []
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:49.0) Gecko/20100101 Firefox/49.0",
-        "Origin": "http://www.poco.cn",
-        "Referer": "http://www.poco.cn /user/user_center?user_id=173522648",
-        "Host": "web-api.poco.cn",
+        #"Origin": "http://www.poco.cn",
+        #"Referer": "http://www.poco.cn /user/user_center?user_id=173522648",
+        #"Host": "web-api.poco.cn",
         "Connection": "Keep-Alive",
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
     }
@@ -82,6 +83,9 @@ class VBase(BaseSpider):
         logs.append('took ' + str(time.time()-self.start_time) + ' seconds')
         logs.append('finished ' + str(self.finished_album_num) + ' albums')
         logs.append('finished ' + str(self.finished_pic_num)+' pics')
+        if len(self.finished_album_names):
+            logs.append('crawled new pic for album(s) ['+",".join(self.finished_album_names)+']')
+        #end if
         my_log = "\r\n".join(logs)
         log_file = self._log_file()
         self._add_log("\r\n["+str(time.strftime('%Y%m%d', time.localtime()))+']'+my_log+"\r\n")
@@ -129,7 +133,11 @@ class VBase(BaseSpider):
                     with open(pic_path, 'wb') as f:
                         f.write(res.content)
                         self.finished_pic_num = self.finished_pic_num + 1
-                        # end with
+                        album_name = pic_path.split('/')[-2]
+                        if not album_name in self.finished_album_names:
+                            self.finished_album_names.append(album_name)
+                        #end if
+                    # end with
                 except IOError:
                     print('save '+pic_path+' failed')
                     return
@@ -165,7 +173,7 @@ class VBase(BaseSpider):
 
     def _append_done_list(self, item):
         print('done list >>>>>>>>>>>>>>>>>>>>>'+self._done_list_file())
-        common_func.add_log(self._done_list_file(), item+"\r\n", 'a+')
+        common_func.add_log(self._done_list_file(), self._md5(item)+"\r\n", 'a+')
     #end def
 
     def _md5(self, str):
@@ -184,6 +192,15 @@ class VBase(BaseSpider):
             return "\n"
         else:
             return "\r"
+    #end def
+
+
+    def _isDoubleCrawled(self, url):
+        res =  self._md5(url) + self._sysLineSymbol() in self.done_list
+        if res:
+            print('>>>>crawl [' + url + '] has been done, pass<<<<')
+        #end if
+        return res
     #end def
 
 #end base

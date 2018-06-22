@@ -85,3 +85,9 @@ tpy_blog_urls = [
     'http://dp.pconline.com.cn/15660510',
     'http://dp.pconline.com.cn/45106808'
 ]
+
+five_hundred_artist_list = [
+    'https://500px.com/redbug',
+    'https://500px.com/eikonas',
+    'https://500px.com/markcrislip'
+]

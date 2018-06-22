@@ -121,8 +121,14 @@ class VBase(Spider):
         return segs[0] + '://' + segs[1]
     #end def
 
-    def _save_pic(self, pic_url, save_path):
-        pic_name = pic_url.split('/')[-1]
+    def _save_pic(self, pic_url, save_path, default_name=''):
+        flag = False
+        if default_name=='':
+            pic_name = pic_url.split('/')[-1]
+        else:
+            pic_name = default_name
+        #end if
+
         pic_path = os.path.join(save_path, pic_name)
         if not os.path.isfile(pic_path):
             import requests
@@ -133,21 +139,21 @@ class VBase(Spider):
                     with open(pic_path, 'wb') as f:
                         f.write(res.content)
                         self.finished_pic_num = self.finished_pic_num + 1
-                        album_name = pic_path.split('/')[-2]
-                        if not album_name in self.finished_album_names:
-                            self.finished_album_names.append(album_name)
+                        flag = True
                         #end if
                     # end with
                 except IOError:
                     print('save '+pic_path+' failed')
-                    return
                 #end try
             else:
                 print('request ' + pic_url + ' failed')
             # end fi
         else:
+            flag = True
             print(pic_path + ' exists ')
         # end if
+
+        return flag
     # end def
 
 
@@ -172,7 +178,6 @@ class VBase(Spider):
     #end def
 
     def _append_done_list(self, item):
-        print('done list >>>>>>>>>>>>>>>>>>>>>'+self._done_list_file())
         common_func.add_log(self._done_list_file(), self._md5(item)+"\r\n", 'a+')
     #end def
 

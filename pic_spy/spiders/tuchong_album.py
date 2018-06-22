@@ -25,13 +25,6 @@ class TuchongSpider(VBase.VBase):
     finished_album_num = 0
     account_ids = None
     saved_counter = 0
-    headers={
-        "User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:49.0) Gecko/20100101 Firefox/49.0",
-        "Origin":"https://www.tuchong.com",
-        "Referer":"https://www.tuchong.com",
-        "Connection":"Keep-Alive",
-        "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8"
-    }
 
     def __init__(self):
         super().__init__()

@@ -110,6 +110,7 @@ class TpySpider(VBase.VBase):
         #end for
         self.finished_album_num = self.finished_album_num + 1
         self._append_done_list(response.url)
+        self._log_done_album_name(save_path)
     #end def
 
 

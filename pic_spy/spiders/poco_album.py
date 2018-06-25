@@ -135,6 +135,7 @@ class PocoSpider(VBase.VBase):
 
         matches = re.search(r'uid=(\S+)', response.url)
         save_path  = self.save_path
+        user_id = ''
         if matches:
             user_id = matches.group(1)
             save_path = self.__save_path(user_id)
@@ -146,8 +147,6 @@ class PocoSpider(VBase.VBase):
             return
         #end if
 
-        self._append_done_list(response.url)
-
         selector = HtmlXPathSelector(response)
         img_tags = selector.xpath('//img')
         # print(' img tags num: ' + str(len(img_tags)))
@@ -157,6 +156,9 @@ class PocoSpider(VBase.VBase):
             if matches:
                 self._save_pic(matches.group(1).replace('//', 'http://'), save_path)
         #end
+        self._append_done_list(response.url)
+        #self.finished_album_names.append(str(user_id))
+        self._log_done_album_name(save_path)
     #end def
 
 

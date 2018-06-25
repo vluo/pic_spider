@@ -24,6 +24,7 @@ class A500pxAlbumSpider(VBase.VBase):
         self.account_ids = my_config.config.five_hundred_artist_list
     #end def
 
+
     def start_requests(self):
         initRequests = []
         for id in self.account_ids:
@@ -39,6 +40,7 @@ class A500pxAlbumSpider(VBase.VBase):
             # end if
 
             request = Request(id+'?ftid='+str(self.account_ids.index(id)), callback=self.__parse_pic_url, method='GET', headers=self._getHeader())
+            #self.finished_album_names.append(self.__secondDir(id))
             initRequests.append(request)
         #end for
         return initRequests
@@ -69,6 +71,7 @@ class A500pxAlbumSpider(VBase.VBase):
                         #end if
                     #end if
                 #end for
+                self._log_done_album_name(save_path)
             #end if
         except json.decoder.JSONDecodeError:
             print('json error')

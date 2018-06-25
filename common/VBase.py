@@ -208,4 +208,15 @@ class VBase(Spider):
         return res
     #end def
 
+
+    def _log_done_album_name(self, save_path):
+        if save_path=='':
+            return
+        #end def
+        save_path = save_path.replace(self.save_path+'/', '')
+        if not save_path in self.finished_album_names:#.append()
+            self.finished_album_names.append(save_path)
+        #end if
+    #end def
+
 #end base

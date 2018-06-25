@@ -102,6 +102,7 @@ class TuchongSpider(VBase.VBase):
         try:
             jsonObj = json.loads(response.text)
             if 'images' in jsonObj:
+                save_path = ''
                 for image in jsonObj['images']:
                     pic_url = self.photo_host.replace('[uid]', str(image['user_id']))
                     pic_url = pic_url.replace('[pid]', str(image['img_id']))
@@ -113,6 +114,7 @@ class TuchongSpider(VBase.VBase):
                 #end for
                 self._append_done_list(response.url)
                 self.finished_album_num = self.finished_album_num + 1
+                self._log_done_album_name(save_path)
             else:
                 self._add_log(response.url + " parse json failed")
                 print('>>>  request api error: <<<<<'+response.url)

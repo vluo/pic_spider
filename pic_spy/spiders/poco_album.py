@@ -150,15 +150,19 @@ class PocoSpider(VBase.VBase):
         selector = HtmlXPathSelector(response)
         img_tags = selector.xpath('//img')
         # print(' img tags num: ' + str(len(img_tags)))
+        newOne = False
         for img in img_tags:
             html = img.extract()
             matches = re.search(r'data-src="(\S+)"', html)
             if matches:
-                self._save_pic(matches.group(1).replace('//', 'http://'), save_path)
+                newOne = self._save_pic(matches.group(1).replace('//', 'http://'), save_path)
+            #end fi
         #end
         self._append_done_list(response.url)
         #self.finished_album_names.append(str(user_id))
-        self._log_done_album_name(save_path)
+        if newOne:
+            self._log_done_album_name(save_path)
+        #end if
     #end def
 
 

@@ -102,15 +102,19 @@ class TpySpider(VBase.VBase):
         #end if
 
         imgLinks = response.css('.aViewHD::attr(oimg)').extract()
+        newOne = False
         for link in imgLinks:
             rs = self._save_pic(link, save_path)
             if rs:
                 self.finished_pic_num = self.finished_pic_num + 1
+                newOne = True
             # end if
         #end for
         self.finished_album_num = self.finished_album_num + 1
         self._append_done_list(response.url)
-        self._log_done_album_name(save_path)
+        if newOne:
+            self._log_done_album_name(save_path)
+        #end if
     #end def
 
 

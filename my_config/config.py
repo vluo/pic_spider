@@ -89,5 +89,29 @@ tpy_blog_urls = [
 five_hundred_artist_list = [
     'https://500px.com/redbug',
     'https://500px.com/eikonas',
-    'https://500px.com/markcrislip'
+    'https://500px.com/markcrislip',
+    'https://500px.com/kordan',
+    'https://500px.com/warrenkeelan',
+    'https://500px.com/subiyama',
+    'https://500px.com/fl-photostudio',
+    'https://500px.com/michaelschnabl',
+    'https://500px.com/ivankopchenov',
+    'https://500px.com/crescenzov2',
+    'https://500px.com/diverstef',
+    'https://500px.com/hengki24',
+    'https://500px.com/carman-uk',
+    'https://500px.com/fxkito2',
+    'https://500px.com/diverstef',
+    'https://500px.com/marconunofaria',
+    'https://500px.com/brockwayout'
 ]
+
+xiami_config = {
+    'uid':'10425939',
+    'email':'gw655@126.com',
+    'password':'153211',
+    'login_url':'https://login.xiami.com/web/login',
+    'logout_url':'http://www.xiami.com/member/logout?from=mobile',
+    'collection_url':'https://www.xiami.com/space/lib-song/u/[uid]/page/[page]',
+    'song_info_url':'http://www.xiami.com/widget/xml-single/uid/0/sid/[sid]'
+}

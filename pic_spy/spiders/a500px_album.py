@@ -63,15 +63,19 @@ class A500pxAlbumSpider(VBase.VBase):
         try:
             jsonObj = json.loads(jsonStr)
             if 'userdata' in jsonObj and 'photos' in jsonObj['userdata']:
+                newOne = False
                 for photo in jsonObj['userdata']['photos']:
                     imgUrl = photo['image_url'][-1]
                     if not self._isDoubleCrawled(imgUrl):
                         if self._save_pic(imgUrl, save_path, self._md5(imgUrl)+'.jpg'):
                             self._append_done_list(imgUrl)
+                            newOne = True
                         #end if
                     #end if
                 #end for
-                self._log_done_album_name(save_path)
+                if newOne:
+                    self._log_done_album_name(save_path)
+                #end if
             #end if
         except json.decoder.JSONDecodeError:
             print('json error')

@@ -38,11 +38,10 @@ class TuchongSpider(VBase.VBase):
     def close(self):
         super().close()
         yield Request(self.config['logout_url'], meta=self.xiami_cookie, method='GET', headers=self.headers)
+        print('>>>>>  to close.')
     #end def
 
     def start_requests(self):
-        #return [self.__login_account()]
-        #return self.__parse_song_xml()
         loginUrl = self.config['login_url']
         access_request = Request(loginUrl, callback=self.__login_account, meta={'cookiejar':1}, method='GET', headers=self.headers)
 
@@ -64,8 +63,6 @@ class TuchongSpider(VBase.VBase):
 
 
     def __crawl_colletion_page(self, response):
-        #print(response.text)
-        #return
         url = self.config['collection_url'].replace('[uid]', self.config['uid'])
         url = url.replace('[page]', '1')
         yield Request(url, callback=self.__parse_collecton_list, method='GET', headers=self.headers, meta={'cookiejar': response.meta['cookiejar']})
@@ -80,13 +77,15 @@ class TuchongSpider(VBase.VBase):
 
         print(response.url)
 
-        next_page = response.css('.all_page .p_redirect_l::attr(href)').extract()
-        if len(next_page):
-            next_url = next_page[0]
-            print('next page:'+next_url)
-            host = self._parseHost(response.url)
-            yield Request(host+''+next_url, callback=self.__parse_collecton_list, meta={'cookiejar': 1}, method='GET', headers=self.headers)
-        #END IF
+        if self.done_list is None or len(self.done_list)<1:
+            next_page = response.css('.all_page .p_redirect_l::attr(href)').extract()
+            if len(next_page):
+                next_url = next_page[0]
+                print('next page:' + next_url)
+                host = self._parseHost(response.url)
+                yield Request(host + '' + next_url, callback=self.__parse_collecton_list, meta={'cookiejar': response.meta['cookiejar']}, method='GET', headers=self.headers)
+            # END IF
+        #end if
 
         #song_name_selector = response.css('.track_list .song_name')#.extract()  #track_list   a:nth-child(1)
         play_btns = response.css('.track_list a.song_toclt::attr(onclick)').extract()
@@ -99,7 +98,7 @@ class TuchongSpider(VBase.VBase):
         '''
 
         for id in play_btns:
-            #print(song_names[i]+'/'+'/'+artist_names[i]+'/'+play_btns[i])
+
             id = self.__parse_sid(id)
             if self._isDoubleCrawled(id):
                 continue
@@ -140,12 +139,12 @@ class TuchongSpider(VBase.VBase):
         #end try
         info = {}
         info['song_id'] = track.find('song_id').text
-        info['song_name'] = track.find('song_name').text.replace('/', '&')
+        info['song_name'] = track.find('song_name').text.replace('/', '.')
         info['album_name'] = track.find('album_name').text
-        info['album_cover'] = track.find('album_cover').text
+        info['album_cover'] = 'https:'+track.find('album_cover').text
         info['artist_name'] = track.find('artist_name').text
         info['location'] = self.__str2url(track.find('location').text)
-
+        #print(info['location'])
         if self.__save_song(info):
             self._append_done_list(info['song_id'])
             self.finished_album_names.append(info['artist_name'])
@@ -158,11 +157,12 @@ class TuchongSpider(VBase.VBase):
     def __save_song(self, info):
         print(info['location'])
         #return
+        self._save_pic(info['album_cover'], self.__save_path(info['artist_name']), info['album_name'].replace('/', '.') + '.jpg')
         return self._save_pic(info['location'], self.__save_path(info['artist_name']), info['artist_name']+'_'+info['song_name']+'.mp3')
     #end def
 
     def __str2url(self, s):
-        print(s)
+        #print(s)
         # s = '9hFaF2FF%_Et%m4F4%538t2i%795E%3pF.265E85.%fnF9742Em33e162_36pA.t6661983%x%6%%74%2i2%22735'
         #4h%2F8an252523F624l3a_%5E8%%%d%9cd7337t3Fm.meFEFEF132%1.%uk335%555553fa55c%tA%1xit79793%8458m3teD%85EEE1Ed21c325p%22i.%%%%%321_E_pFhy156E---7af9ef25E
         #9hFx%33F573yE5E3eft%i237136F%5E-f42t2aF8%7__a38-cfdepFm82566luD6%7482%mi21E8%.t1857fe231.1%395mh5%Ebc1bA2n%219Ep_35-6265%8e2F%363k%E%84b2.tF3268%e5%5c6e

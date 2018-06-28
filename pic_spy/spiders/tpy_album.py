@@ -48,15 +48,18 @@ class TpySpider(VBase.VBase):
         uid = matches.group(1)
 
         albumLinks = response.css('.photo_content li a::attr(href)').extract()
-        nextPage = response.css('#JPage .next::attr(href)').extract()
-        if nextPage:
-            nextLink = self.__userHost(response.url)+''+nextPage[0]
-            if not nextLink in my_config.config.tpy_blog_urls:
-                yield Request(nextLink, callback=self.__parse_alum_list, method='GET', headers=self._getHeader())
+        save_path = os.path.join(self.save_path, str(uid))
+        if self._crawlMorePages(save_path):
+            nextPage = response.css('#JPage .next::attr(href)').extract()
+            if nextPage:
+                nextLink = self.__userHost(response.url)+''+nextPage[0]
+                if not nextLink in my_config.config.tpy_blog_urls:
+                    yield Request(nextLink, callback=self.__parse_alum_list, method='GET', headers=self._getHeader())
+                #end if
+                print('news page>>>>'+nextLink)
+            else:
+                print('no next')
             #end if
-            print('news page>>>>'+nextLink)
-        else:
-            print('no next')
         #end if
 
         if len(albumLinks):

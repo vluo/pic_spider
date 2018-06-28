@@ -209,6 +209,16 @@ class VBase(Spider):
     #end def
 
 
+    def _crawlMorePages(self, save_path):
+        import  glob
+        save_path = os.path.join(save_path, '*.log')
+        config_file = glob.glob(save_path)
+        return len(config_file)<1
+    #end def
+
+
+
+
     def _log_done_album_name(self, save_path):
         if save_path=='':
             return

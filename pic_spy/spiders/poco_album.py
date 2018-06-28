@@ -30,7 +30,8 @@ class PocoSpider(VBase.VBase):
         initRequests = []
         for id in self.account_ids:
             self.cur_page = 1
-            log_file = self._daily_log_file(self.__save_path(id))
+            save_path = self.__save_path(id)
+            log_file = self._daily_log_file(save_path)
             print (log_file)
             if os.path.exists(log_file):
                 pass
@@ -42,12 +43,15 @@ class PocoSpider(VBase.VBase):
             if not isinstance(self.account_ids[id], list):
                 self.account_ids[id] = [self.account_ids[id]]
             #end if
+
             for authCode in self.account_ids[id]:
                 request = FormRequest(self.api_url, callback=self.__parse_alum_list, formdata=self.__formData(id, self.cur_page), headers=self._getHeader())
+                initRequests.append(request)
+                if self._crawlMorePages(save_path):
+                    break;
+                #end if
                 self.cur_page = self.cur_page + 1
             #end for
-
-            initRequests.append(request)
         #end for
         return initRequests
     #end def
@@ -92,7 +96,7 @@ class PocoSpider(VBase.VBase):
         if response.status != 200 or response.text == '':
             self._add_log(response.url + ' request failed ' + str(response.status))
             print(str(response.status) + ' >>>>>>>>> ' + response.url)
-            return None
+            return
         # end if
         album_num = 0;
         try:

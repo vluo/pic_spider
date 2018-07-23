@@ -31,23 +31,14 @@ class PocoSpider(VBase.VBase):
         for id in self.account_ids:
             self.cur_page = 1
             save_path = self.__save_path(id)
-            log_file = self._daily_log_file(save_path)
-            print (log_file)
-            if os.path.exists(log_file):
-                pass
-                #print('>>>>crawl [' + id + '] has been done, pass<<<<')
-                #continue
-            else:
-                 common_func.add_log(log_file, '')
-            # end if
             if not isinstance(self.account_ids[id], list):
                 self.account_ids[id] = [self.account_ids[id]]
-            #end if
+            # end if
 
             for authCode in self.account_ids[id]:
                 request = FormRequest(self.api_url, callback=self.__parse_alum_list, formdata=self.__formData(id, self.cur_page), headers=self._getHeader())
                 initRequests.append(request)
-                if self._crawlMorePages(save_path):
+                if not self._crawlMorePages(save_path):
                     break;
                 #end if
                 self.cur_page = self.cur_page + 1
@@ -159,12 +150,15 @@ class PocoSpider(VBase.VBase):
             html = img.extract()
             matches = re.search(r'data-src="(\S+)"', html)
             if matches:
-                newOne = self._save_pic(matches.group(1).replace('//', 'http://'), save_path)
+                if self._save_pic(matches.group(1).replace('//', 'http://'), save_path):
+                    newOne = True
+                #end if
             #end fi
         #end
         self._append_done_list(response.url)
         #self.finished_album_names.append(str(user_id))
         if newOne:
+            self._add_daily_log(save_path)
             self._log_done_album_name(save_path)
         #end if
     #end def

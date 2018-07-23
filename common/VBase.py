@@ -116,6 +116,18 @@ class VBase(Spider):
         return os.path.join(save_path, str(dateStr) + '.log')
     #end def
 
+    def _add_daily_log(self, save_path):
+        log_file = self._daily_log_file(save_path)
+        if os.path.exists(log_file):
+            return True
+            # print('>>>>crawl [' + id + '] has been done, pass<<<<')
+            # continue
+        else:
+            common_func.add_log(log_file, '')
+            return False
+        # end if
+    #end def
+
     def _parseHost(self, url):
         segs = parse.urlparse(url)
         return segs[0] + '://' + segs[1]

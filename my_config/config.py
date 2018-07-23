@@ -39,7 +39,9 @@ artist_list = {
     '288782':'https://littledemon.tuchong.com',
     '1039253':'https://tuchong.com',
     '3505293':'https://tuchong.com',
-    '3522380':'https://tuchong.com'
+    '3522380':'https://tuchong.com',
+    '1745920':'https://tuchong.com',
+    '2934511':'https://tuchong.com'
 }
 
 poco_account_ids = {
@@ -76,7 +78,11 @@ poco_account_ids = {
         '55708170':['0f1e7705e06c9cc75de', '9b337c5c595ed4ccedb'],
         '56551348':['c4dd608c974df605d71','a2f24b32ddc5210dbd2','dcb61ee03db793cac37','92bb2f73684400ba836','145ee1529af2aeeea93','70b76885dae2d9522a8'],
         '53868931':['193a046f93f41798590', 'a46cf5bd0f344d393be', '43d21bc921643cf2d7e','685a6a413b1efc6b052', '0cf8bce34b0f3f52ba6', 'ead8fe2a0a50ae3ca23', '61d9a711e4a46784360', 'fc763a4e4ec4a161d70', '9c4cf7f453a5d0d5222'],
-        '52812329':['a3d074229bff7e394fc', '14bd90a69d14fdf4e1a', 'a35d500bfd087f5fdf0', '5dd584913f922d0e02e', '5a254cd2ffb18cbd67a', 'ad34db66f0e4a6c8583', '9804d7e5e6e00968886', '8e61beb3da96b3eb2ce', '86ca7f6cbaf26c74b6c', 'd4803edeed8ec17466c']
+        '52812329':['a3d074229bff7e394fc', '14bd90a69d14fdf4e1a', 'a35d500bfd087f5fdf0', '5dd584913f922d0e02e', '5a254cd2ffb18cbd67a', 'ad34db66f0e4a6c8583', '9804d7e5e6e00968886', '8e61beb3da96b3eb2ce', '86ca7f6cbaf26c74b6c', 'd4803edeed8ec17466c'],
+        '51802661':['81f281af758a9a588c1', 'e55614aa3e70ea790d3', '4377d333e5ecef28433','6072e02d71f6364d2cb', '0d83b63e377dd1dc00e','5ab2032c2fc7264c581'],
+        '56470991':['1c498e69efd2df243bb','a37c4e63457a56ed6e1','5012d04e32fe026d737','5bd1232b710983f1752'],
+        '64316077':['6a56efd6639264418eb','74e623068ff12081f18', '1501e64a976ec6cb7c8'],
+        '184030735':['67fe33692c8d857642f','a499469047664a9f1b5','']
 }
 
 tpy_blog_urls = [
@@ -112,10 +118,23 @@ five_hundred_artist_list = [
 
 xiami_config = {
     'uid':'10425939',
-    'email':'gw655@126.com',
-    'password':'153211',
+    'email':'',
+    'password':'',
     'login_url':'https://login.xiami.com/web/login',
     'logout_url':'http://www.xiami.com/member/logout?from=mobile',
     'collection_url':'https://www.xiami.com/space/lib-song/u/[uid]/page/[page]',
     'song_info_url':'http://www.xiami.com/widget/xml-single/uid/0/sid/[sid]'
 }
+
+xiami_collection = {
+    'next_page_url':'https://www.xiami.com/collect/ajax-get-list?id=[id]&p=[page]&limit=[page_size]',
+    'set_pos_url':'https://www.xiami.com/collect/ajax-update-song',
+    'max_page_size':50,
+    'list':[
+        #'https://www.xiami.com/collect/15176924',
+        #'https://www.xiami.com/collect/120123323',
+        #'https://www.xiami.com/collect/413114513',
+        'https://www.xiami.com/collect/413114513'
+    ]
+}
+

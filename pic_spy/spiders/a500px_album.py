@@ -29,15 +29,7 @@ class A500pxAlbumSpider(VBase.VBase):
         initRequests = []
         for id in self.account_ids:
             save_path = self.__save_path(id)
-            log_file = self._daily_log_file(save_path)
-            if os.path.exists(log_file):
-                pass
-                #print('>>>>crawl ['+self.account_ids[id]+'] has been done, pass<<<<')
-                #continue
-            else:
-                if not os.path.exists(save_path):
-                    os.makedirs(save_path)
-            # end if
+            self._add_daily_log(save_path)
 
             request = Request(id+'?ftid='+str(self.account_ids.index(id)), callback=self.__parse_pic_url, method='GET', headers=self._getHeader())
             #self.finished_album_names.append(self.__secondDir(id))

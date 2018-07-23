@@ -35,21 +35,10 @@ class TuchongSpider(VBase.VBase):
         initRequests = []
         for id in self.account_ids:
             save_path = self.__save_path(self.account_ids[id], id)
-            log_file = self._daily_log_file(save_path)
-            to_crawl_album_num = 100
-            if os.path.exists(log_file):
-                pass
-                #print('>>>>crawl ['+self.account_ids[id]+'] has been done, pass<<<<')
-                #continue
-            else:
-                if not os.path.exists(save_path):
-                    os.makedirs(save_path)
-                else:
-                    to_crawl_album_num = 5
-                # end if
-                common_func.add_log(log_file, '')
-            # end if
-
+            to_crawl_album_num = 210
+            if not self._crawlMorePages(save_path):
+                to_crawl_album_num = 5
+            #end if
             self.api_url = self.api_url.replace('[num]', str(to_crawl_album_num))
             request = Request(self.account_ids[id]+''+self.api_url.replace('[uid]', id), callback=self.__parse_alum_list, method='GET', headers=self._getHeader())
             initRequests.append(request)
@@ -108,16 +97,17 @@ class TuchongSpider(VBase.VBase):
                     pic_url = self.photo_host.replace('[uid]', str(image['user_id']))
                     pic_url = pic_url.replace('[pid]', str(image['img_id']))
                     save_path = self.__save_path(response.url, str(image['user_id']))
-                    rs = self._save_pic(pic_url, save_path)
-                    if rs:
-                        self.finished_pic_num = self.finished_pic_num +1
+                    if self._save_pic(pic_url, save_path):
+                        #self.finished_pic_num = self.finished_pic_num +1
                         newOne = True
                     #end if
                 #end for
-                self._append_done_list(response.url)
-                self.finished_album_num = self.finished_album_num + 1
+
                 if newOne:
+                    self._add_daily_log(save_path)
                     self._log_done_album_name(save_path)
+                    self._append_done_list(response.url)
+                    self.finished_album_num = self.finished_album_num + 1
                 #end if
             else:
                 self._add_log(response.url + " parse json failed")
@@ -135,7 +125,11 @@ class TuchongSpider(VBase.VBase):
         if userHost == 'tuchong.com':
             userHost = uid + '.' + userHost
         #end if
-        return os.path.join(self.save_path, userHost)
+        save_path = os.path.join(self.save_path, userHost)
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        #end fi
+        return save_path
     #end def
 
 

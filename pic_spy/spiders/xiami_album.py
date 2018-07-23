@@ -15,7 +15,7 @@ from common import VBase
 from common import common_func
 
 
-class TuchongSpider(VBase.VBase):
+class xiamiSpider(VBase.VBase):
     name =  'xiami_album'
     start_urls = []
     allowed_domains = ["xiami.com"]
@@ -43,12 +43,12 @@ class TuchongSpider(VBase.VBase):
 
     def start_requests(self):
         loginUrl = self.config['login_url']
-        access_request = Request(loginUrl, callback=self.__login_account, meta={'cookiejar':1}, method='GET', headers=self.headers)
+        access_request = Request(loginUrl, callback=self._login_account, meta={'cookiejar':1}, method='GET', headers=self.headers)
 
         return [access_request]
     #end def
 
-    def __login_account(self, response):
+    def _login_account(self, response):
         #print(response.text)
         initRequests = []
         loginUrl = self.config['login_url']
@@ -57,18 +57,18 @@ class TuchongSpider(VBase.VBase):
         headers = self.headers  # 'Referer':'http://www.xiami.com/web/login'
         headers['Referer'] = loginUrl
         self.xiami_cookie = {'cookiejar': response.meta['cookiejar']}
-        yield FormRequest(loginUrl, callback=self.__crawl_colletion_page, formdata=postData, meta=self.xiami_cookie, method='POST', headers=headers)
+        yield FormRequest(loginUrl, callback=self._crawl_colletion_page, formdata=postData, meta=self.xiami_cookie, method='POST', headers=headers)
         #yield Request(loginUrl, callback=self.__crawl_colletion_page, body=postData, meta={'cookiejar': response.meta['cookiejar']}, method='POST', headers=headers)
     #end def
 
 
-    def __crawl_colletion_page(self, response):
+    def _crawl_colletion_page(self, response):
         url = self.config['collection_url'].replace('[uid]', self.config['uid'])
         url = url.replace('[page]', '1')
-        yield Request(url, callback=self.__parse_collecton_list, method='GET', headers=self.headers, meta={'cookiejar': response.meta['cookiejar']})
+        yield Request(url, callback=self._parse_collecton_list, method='GET', headers=self.headers, meta={'cookiejar': response.meta['cookiejar']})
     #end def
 
-    def __parse_collecton_list(self, response):
+    def _parse_collecton_list(self, response):
         if response.status != 200 or response.text == '':
             self._add_log(response.url + ' request failed ' + str(response.status))
             print('request error >> '+str(response.status) + ' >>>>>>>>> '+response.url)
@@ -98,13 +98,12 @@ class TuchongSpider(VBase.VBase):
         '''
 
         for id in play_btns:
-
             id = self.__parse_sid(id)
             if self._isDoubleCrawled(id):
                 continue
             #end if
             url = self.config['song_info_url'].replace('[sid]', id)
-            yield Request(url, callback=self.__parse_song_xml, method='GET', headers=self.headers, meta={'cookiejar': response.meta['cookiejar']})
+            yield Request(url, callback=self._parse_song_xml, method='GET', headers=self.headers, meta={'cookiejar': response.meta['cookiejar']})
         #end for
 
     #end def
@@ -115,7 +114,7 @@ class TuchongSpider(VBase.VBase):
     #end def
 
 
-    def __parse_song_xml(self, response):
+    def _parse_song_xml(self, response):
         if response.status != 200 or response.text == '':
             self._add_log(response.url + ' request failed ' + str(response.status))
             #self._append_done_list(response.url)
@@ -157,7 +156,9 @@ class TuchongSpider(VBase.VBase):
     def __save_song(self, info):
         print(info['location'])
         #return
-        self._save_pic(info['album_cover'], self.__save_path(info['artist_name']), info['album_name'].replace('/', '.') + '.jpg')
+        save_path = self.__save_path(info['artist_name'])
+        self._save_pic(info['album_cover'], save_path, info['album_name'].replace('/', '.') + '.jpg')
+        self._add_daily_log(save_path)
         return self._save_pic(info['location'], self.__save_path(info['artist_name']), info['artist_name']+'_'+info['song_name']+'.mp3')
     #end def
 

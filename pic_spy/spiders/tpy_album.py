@@ -28,7 +28,7 @@ class TpySpider(VBase.VBase):
             request = Request(url, callback=self.__parse_alum_list, method='GET', headers=self._getHeader())
             initRequests.append(request)
         #end for
-        print(my_config.config.tpy_blog_urls)
+
         return initRequests
     #end def
 
@@ -39,13 +39,6 @@ class TpySpider(VBase.VBase):
             print('request error >> '+str(response.status) + ' >>>>>>>>> ')
             return
         # end if
-
-        matches = re.search(r'(\d+)', response.url)
-        if not matches:
-            print('uid not found')
-            return
-        # end if
-        uid = matches.group(1)
 
         albumLinks = response.css('.photo_content li a::attr(href)').extract()
         save_path = os.path.join(self.save_path, str(uid))
@@ -93,13 +86,13 @@ class TpySpider(VBase.VBase):
             return None
         # end if
 
-        matches = re.search(r'uid=(\d+)', response.url)
-        if not matches:
+        uid = self.__parseUid(r'uid=(\d+)', response.url)
+        if not uid:
             print('uid not found')
             return
         # end if
-        uid = matches.group(1)
-        save_path = os.path.join(self.save_path, str(uid))
+
+        save_path = self.__save_path(uid)
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         #end if
@@ -117,6 +110,7 @@ class TpySpider(VBase.VBase):
         self._append_done_list(response.url)
         if newOne:
             self._log_done_album_name(save_path)
+            self._add_daily_log(save_path)
         #end if
     #end def
 
@@ -126,6 +120,17 @@ class TpySpider(VBase.VBase):
         return segs[0] + '://' + segs[1]
     #end def
 
+    def __parseUid(self, reg, url):
+        matches = re.search(reg, url)
+        if not matches:
+            return False
+        # end if
+        return matches.group(1)
+    #end def
+
+    def __save_path(self, uid):
+        return os.path.join(self.save_path, str(uid))
+    #end def
 
     def __save_pic(self, pic_url, host):
         pic_name =  pic_url.split('/')[-1]

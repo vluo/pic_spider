@@ -1,11 +1,7 @@
 import os, glob
+from urllib.parse import urlparse
 
 
+o = urlparse('http://www.cwi.nl/%7Eguido/Python.html')
 
-file = os.getcwd()+'/*.py'
-r = glob.glob(r'*.py')
-print(file)
-if r is None or len(r)==0:
-    print('no')
-else:
-    print(r)
+print(o[1])

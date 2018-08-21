@@ -20,6 +20,7 @@ class PocoSpider(VBase.VBase):
     page_size = 18
     my_poco_id = 173522648
     account_ids = None
+    dirs = {}
 
     def __init__(self):
         super().__init__()
@@ -30,16 +31,24 @@ class PocoSpider(VBase.VBase):
         initRequests = []
         for id in self.account_ids:
             self.cur_page = 1
-            save_path = self.__save_path(id)
-            if not isinstance(self.account_ids[id], list):
-                self.account_ids[id] = [self.account_ids[id]]
-            # end if
 
-            for authCode in self.account_ids[id]:
-                request = FormRequest(self.api_url, callback=self.__parse_alum_list, formdata=self.__formData(id, self.cur_page), headers=self._getHeader())
+            if isinstance(self.account_ids[id], dict):
+                save_path = self.__save_path(id, self.account_ids[id]['author'])
+                authCodes = self.account_ids[id]['code']
+            elif not isinstance(self.account_ids[id], list):
+                save_path = self.__save_path(id)
+                authCodes = [self.account_ids[id]]
+            else:
+                save_path = self.__save_path(id)
+                authCodes = self.account_ids[id]
+            # end if
+            self.account_ids[id] = authCodes
+            print(authCodes)
+            for authCode in authCodes:
+                request = FormRequest(self.api_url+'?code='+authCode+'&uid='+id, callback=self.__parse_alum_list, formdata=self.__formData(id, self.cur_page), headers=self._getHeader())
                 initRequests.append(request)
                 if not self._crawlMorePages(save_path):
-                    break;
+                    continue#break;
                 #end if
                 self.cur_page = self.cur_page + 1
             #end for
@@ -97,8 +106,8 @@ class PocoSpider(VBase.VBase):
                 for work in jsonObj['data']['list']:
                     cur_user_id = int(work['user_id'])
                     albumUrl = 'http://www.poco.cn/works/detail?works_id='+str(work['works_id'])+'&uid='+str(cur_user_id)
-                    if self._isDoubleCrawled(albumUrl):
-                        continue
+                    if False and self._isDoubleCrawled(albumUrl):
+                        break
                     # end if
 
                     yield FormRequest(albumUrl, callback=self.__parse_album)#, formdata=None, headers=self._getHeader())   #
@@ -133,7 +142,9 @@ class PocoSpider(VBase.VBase):
         user_id = ''
         if matches:
             user_id = matches.group(1)
-            save_path = self.__save_path(user_id)
+            save_path = self.dirs[str(user_id)] #self.__save_path(user_id)
+            print(str(user_id))
+            print(self.dirs)
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
             #end if
@@ -164,8 +175,13 @@ class PocoSpider(VBase.VBase):
     #end def
 
 
-    def __save_path(self, uid):
-        return os.path.join(self.save_path, str(uid))
+    def __save_path(self, uid, author=''):
+        if author=='':
+            author = id
+        #if  else uid
+        dir = os.path.join(self.save_path, str(author))
+        self.dirs[uid] = dir
+        return dir
     #end def
 
 

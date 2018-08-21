@@ -25,6 +25,7 @@ class TuchongSpider(VBase.VBase):
     finished_album_num = 0
     account_ids = None
     saved_counter = 0
+    author_mapping = {}
 
     def __init__(self):
         super().__init__()
@@ -34,13 +35,20 @@ class TuchongSpider(VBase.VBase):
     def start_requests(self):
         initRequests = []
         for id in self.account_ids:
-            save_path = self.__save_path(self.account_ids[id], id)
+            author = id
+            if isinstance(self.account_ids[id], list):
+                self.account_ids[id] = self.account_ids[id][0]
+                author = self.account_ids[id][1]
+                self.author_mapping[id] = author
+            #end if
+            save_path = self.__save_path(self.account_ids[id], author)
             to_crawl_album_num = 210
+            print(save_path)
             if not self._crawlMorePages(save_path):
                 to_crawl_album_num = 5
             #end if
-            self.api_url = self.api_url.replace('[num]', str(to_crawl_album_num))
-            request = Request(self.account_ids[id]+''+self.api_url.replace('[uid]', id), callback=self.__parse_alum_list, method='GET', headers=self._getHeader())
+            api_url = self.api_url.replace('[num]', str(to_crawl_album_num))
+            request = Request(self.account_ids[id]+''+api_url.replace('[uid]', id), callback=self.__parse_alum_list, method='GET', headers=self._getHeader())
             initRequests.append(request)
         #end for
         return initRequests
@@ -63,7 +71,7 @@ class TuchongSpider(VBase.VBase):
                     post['post_id'] = str(post['post_id'])
                     albumUrl = host + '/rest/posts/' + post['post_id']
                     if self._isDoubleCrawled(albumUrl):
-                        continue
+                        break
                     #end if
 
                     yield Request(albumUrl, callback=self.__parse_album_pics, method='GET', headers=self._getHeader())   #url, callback=None, method='GET', headers=None
@@ -96,7 +104,11 @@ class TuchongSpider(VBase.VBase):
                 for image in jsonObj['images']:
                     pic_url = self.photo_host.replace('[uid]', str(image['user_id']))
                     pic_url = pic_url.replace('[pid]', str(image['img_id']))
-                    save_path = self.__save_path(response.url, str(image['user_id']))
+                    author = str(image['user_id'])
+                    if author in self.author_mapping:
+                        author = self.author_mapping[author]
+                    #end if
+                    save_path = self.__save_path(response.url, author)
                     if self._save_pic(pic_url, save_path):
                         #self.finished_pic_num = self.finished_pic_num +1
                         newOne = True

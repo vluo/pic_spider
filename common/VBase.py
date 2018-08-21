@@ -141,6 +141,10 @@ class VBase(Spider):
             pic_name = default_name
         #end if
 
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        #end
+
         pic_path = os.path.join(save_path, pic_name)
         if not os.path.isfile(pic_path):
             import requests
@@ -220,6 +224,12 @@ class VBase(Spider):
         return res
     #end def
 
+    def _parseDomian(self, url):
+        from urllib.parse import urlparse
+        o = urlparse(url)
+        return o[1]
+    #end def
+
 
     def _crawlMorePages(self, save_path):
         import  glob
@@ -227,9 +237,6 @@ class VBase(Spider):
         config_file = glob.glob(save_path)
         return len(config_file)<1
     #end def
-
-
-
 
     def _log_done_album_name(self, save_path):
         if save_path=='':

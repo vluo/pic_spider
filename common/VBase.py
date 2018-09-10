@@ -148,7 +148,7 @@ class VBase(Spider):
         pic_path = os.path.join(save_path, pic_name)
         if not os.path.isfile(pic_path):
             import requests
-            res = requests.get(pic_url)
+            res = requests.get(pic_url, headers=self._getHeader())
             if res and res.status_code == requests.codes.ok and res.content:
                 print(str(self.finished_pic_num) + ' to save ' + pic_path)
                 try:
@@ -166,7 +166,7 @@ class VBase(Spider):
             # end fi
         else:
             flag = True
-            print(pic_path + ' exists ')
+            #print(pic_path + ' exists ')
         # end if
 
         return flag

@@ -20,6 +20,7 @@ class LofterSpider(VBase.VBase):
     blogs_arr = []
     blog_cookies = {}
     header = None
+    post_num = {}
 
     def __init__(self):
         super().__init__()
@@ -46,7 +47,9 @@ class LofterSpider(VBase.VBase):
     def __call_blog_api(self, response):
         print('after blog list >>>>>>>>>>>>>>>>> ' + response.url)
         if response.status != 200 or response.text == '':
-            pass
+            self._add_log(response.url + ' request failed ' + str(response.status))
+            print(str(response.status) + ' >>>>>>>>> ' + response.url)
+            return
         # end if
 
         blog = self._parseHost(response.url)
@@ -59,7 +62,8 @@ class LofterSpider(VBase.VBase):
             print(response.url+' no blog id found')
             return
         #end if
-
+        post_num = (200 if self._crawlMorePages(self.__save_path(blog)) else 5)
+        print('to craw %4d '%post_num+' posts of '+blog)
         post_data = {
             'callCount':'1',
             'scriptSessionId':'${scriptSessionId}187',
@@ -69,7 +73,7 @@ class LofterSpider(VBase.VBase):
             'c0-id':'0',
             'c0-param0':'number:'+str(blog_id),#blog id
             'c0-param1':'number:1533000287367',
-            'c0-param2':'number:100',
+            'c0-param2':'number:'+str(post_num),
             'c0-param3':'boolean:false',
             'batchId':'604545'
         }
@@ -88,7 +92,9 @@ class LofterSpider(VBase.VBase):
     def __parse_post_list(self, response):
         print('to parse post list')
         if response.status != 200 or response.text == '':
-            pass
+            self._add_log(response.url + ' request failed ' + str(response.status))
+            print(str(response.status) + ' >>>>>>>>> ' + response.url)
+            return
         # end if
 
         blog_link = 'http://'+self._parseDomian(response.url)
@@ -101,7 +107,13 @@ class LofterSpider(VBase.VBase):
         self.header['Referer'] = blog_link
         for id in post_ids:
             link = blog_link+'/post/'+id
-            if True or not self._isDoubleCrawled(link):
+            if blog_link in self.post_num: # = self.post_num +1
+                self.post_num[blog_link] = self.post_num[blog_link] + 1
+            else:
+                self.post_num[blog_link] = 1
+            #end if
+            print('post %04d '%self.post_num[blog_link]+' in : '+blog_link)
+            if not self._isDoubleCrawled(link):
                 print('to crawl >>>'+link)
                 yield Request(link, callback=self.__parse_post_content, method='GET', headers=self.header)
             else:
@@ -140,7 +152,7 @@ class LofterSpider(VBase.VBase):
             self._add_log(blog_link+' not found in blog_arr')
             return
         #end if
-        print(pattern)
+
         #pattern = '.imgwrapper'
         img_links = response.css(pattern).extract()
         print(str(len(img_links)) + ' pics to crawl//'+response.url)

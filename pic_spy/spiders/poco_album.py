@@ -43,12 +43,13 @@ class PocoSpider(VBase.VBase):
                 authCodes = self.account_ids[id]
             # end if
             self.account_ids[id] = authCodes
-            print(authCodes)
+            #print(authCodes)
             for authCode in authCodes:
-                request = FormRequest(self.api_url+'?code='+authCode+'&uid='+id, callback=self.__parse_alum_list, formdata=self.__formData(id, self.cur_page), headers=self._getHeader())
+                requestURL = self.api_url+'?code='+authCode+'&uid='+id
+                request = FormRequest(requestURL, callback=self.__parse_alum_list, formdata=self.__formData(id, self.cur_page), headers=self._getHeader())
                 initRequests.append(request)
                 if not self._crawlMorePages(save_path):
-                    continue#break;
+                    break;
                 #end if
                 self.cur_page = self.cur_page + 1
             #end for
@@ -103,17 +104,24 @@ class PocoSpider(VBase.VBase):
             jsonObj = json.loads(response.text)
             cur_user_id = 0
             if 'data' in jsonObj and 'list' in jsonObj['data']:
+                pass4Double = False
                 for work in jsonObj['data']['list']:
                     cur_user_id = int(work['user_id'])
                     albumUrl = 'http://www.poco.cn/works/detail?works_id='+str(work['works_id'])+'&uid='+str(cur_user_id)
-                    if False and self._isDoubleCrawled(albumUrl):
+                    if self._isDoubleCrawled(albumUrl):
+                        pass4Double = True
                         break
                     # end if
-
+                    #self.finished_album_num = self.finished_album_num + 1
+                    album_num = album_num+1
+                    print('%04d'%self.finished_album_num+' : '+albumUrl)
                     yield FormRequest(albumUrl, callback=self.__parse_album)#, formdata=None, headers=self._getHeader())   #
-                    album_num = album_num +1
-                    self.finished_album_num = self.finished_album_num + len(jsonObj['data']['list'])
                 #end for
+
+                if not pass4Double and  album_num == 0:
+                    self._add_log(response.text + ' >>> none album')
+                    print(jsonObj)
+                # end if
             else:
                 self._add_log(response.url+' parse json failed')
                 print('request api error: '+jsonObj['message'])
@@ -126,11 +134,13 @@ class PocoSpider(VBase.VBase):
             self._add_log(response.url + ' parse json failed')
             print('json error')
         #
+
         print (response.url+' >>> to crawl '+str(album_num)+' albums')
     #end def
 
 
     def __parse_album(self, response):
+        print('%04d'%self.finished_album_num+' : '+response.url)
         if response.status != 200 or response.text == '':
             self._add_log(response.url + ' request failed '+str(response.status))
             print(str(response.status) + ' >>>>>>>>> ' + response.url)
@@ -143,8 +153,6 @@ class PocoSpider(VBase.VBase):
         if matches:
             user_id = matches.group(1)
             save_path = self.dirs[str(user_id)] #self.__save_path(user_id)
-            print(str(user_id))
-            print(self.dirs)
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
             #end if
@@ -157,6 +165,7 @@ class PocoSpider(VBase.VBase):
         img_tags = selector.xpath('//img')
         # print(' img tags num: ' + str(len(img_tags)))
         newOne = False
+        print(response.url+' pic num = '+str(len(img_tags)))
         for img in img_tags:
             html = img.extract()
             matches = re.search(r'data-src="(\S+)"', html)
@@ -166,18 +175,20 @@ class PocoSpider(VBase.VBase):
                 #end if
             #end fi
         #end
-        self._append_done_list(response.url)
+
         #self.finished_album_names.append(str(user_id))
         if newOne:
+            self._append_done_list(response.url)
             self._add_daily_log(save_path)
             self._log_done_album_name(save_path)
+            self.finished_album_num = self.finished_album_num + 1
         #end if
     #end def
 
 
     def __save_path(self, uid, author=''):
         if author=='':
-            author = id
+            author = uid
         #if  else uid
         dir = os.path.join(self.save_path, str(author))
         self.dirs[uid] = dir

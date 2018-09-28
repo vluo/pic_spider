@@ -15,6 +15,7 @@ from common import VBase
 class TpySpider(VBase.VBase):
     name =  'tpy_album'
     start_urls = []
+    authorMapping = {}
     allowed_domains = ["pconline.com.cn"]
 
     def __init__(self):
@@ -23,7 +24,10 @@ class TpySpider(VBase.VBase):
 
     def start_requests(self):
         initRequests = []
-        for url in my_config.config.tpy_blog_urls:
+        for author in my_config.config.tpy_blog_urls:
+            url = my_config.config.tpy_blog_urls[author]
+            uid = self.__parseUid(r'/(\d+)', url)
+            self.authorMapping[uid] = author
             print('url >>>'+url)
             request = Request(url, callback=self.__parse_alum_list, method='GET', headers=self._getHeader())
             initRequests.append(request)
@@ -41,7 +45,9 @@ class TpySpider(VBase.VBase):
         # end if
 
         albumLinks = response.css('.photo_content li a::attr(href)').extract()
-        save_path = os.path.join(self.save_path, str(uid))
+        uid = self.__parseUid(r'/(\d+)', response.url)
+        author = self.authorMapping[uid]
+        save_path = os.path.join(self.save_path, author)
         if self._crawlMorePages(save_path):
             nextPage = response.css('#JPage .next::attr(href)').extract()
             if nextPage:
@@ -67,7 +73,7 @@ class TpySpider(VBase.VBase):
                     print(msg)
                     continue
                 #end if
-                link = link+'?uid='+uid
+                link = 'http:'+link+'?uid='+uid
                 if self._isDoubleCrawled(link):
                     continue
                 #end if
@@ -92,7 +98,8 @@ class TpySpider(VBase.VBase):
             return
         # end if
 
-        save_path = self.__save_path(uid)
+        author = self.authorMapping[uid]
+        save_path = self.__save_path(author)
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         #end if
@@ -100,13 +107,13 @@ class TpySpider(VBase.VBase):
         imgLinks = response.css('.aViewHD::attr(oimg)').extract()
         newOne = False
         for link in imgLinks:
-            rs = self._save_pic(link, save_path)
+            rs = self._save_pic('http:'+link, save_path)
             if rs:
-                self.finished_pic_num = self.finished_pic_num + 1
+                #self.finished_pic_num = self.finished_pic_num + 1
                 newOne = True
             # end if
         #end for
-        self.finished_album_num = self.finished_album_num + 1
+        #self.finished_album_num = self.finished_album_num + 1
         self._append_done_list(response.url)
         if newOne:
             self._log_done_album_name(save_path)
@@ -131,37 +138,6 @@ class TpySpider(VBase.VBase):
     def __save_path(self, uid):
         return os.path.join(self.save_path, str(uid))
     #end def
-
-    def __save_pic(self, pic_url, host):
-        pic_name =  pic_url.split('/')[-1]
-        save_path = os.path.join(self.save_path, host)
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-        # end if
-        pic_path = os.path.join(save_path, pic_name)
-        if not os.path.isfile(pic_path):
-            import requests
-            res = requests.get(pic_url)
-            if res and res.status_code == requests.codes.ok:
-                print('to save '+pic_path)
-                try:
-                    with open(pic_path, 'wb') as f:
-                        f.write(res.content)
-                        self.finished_pic_num = self.finished_pic_num+1
-                        #print('finished '+str(self.finished_pic_num))
-                    #end with
-                except IOError:
-                    print('save ' +pic_path+' failed')
-                    return false
-                #end try
-            #end fi
-        else:
-            print(pic_path+' exists ')
-            return False
-        #end if
-
-        return True
-   #end def
 
 
 #end class

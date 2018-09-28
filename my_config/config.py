@@ -41,8 +41,14 @@ artist_list = {
     '3505293':'https://tuchong.com',
     '3522380':'https://tuchong.com',
     '1745920':'https://tuchong.com',
-    '2934511':'https://tuchong.com',
     '352764':'https://wxtx.tuchong.com',
+    '271682':'https://gyeonlee.tuchong.com',
+    '340244':['https://tuchong.com', '摄影师蝈蝈小姐'],
+    '1485770':['https://tuchong.com', '胡答应'],
+	'1139811':['https://tuchong.com', 'SA视觉'],
+	'1178708':['https://tuchong.com', 'ZXANDREY'],
+	'428732':['https://tuchong.com', '研衔'],
+	'2934511':['https://tuchong.com', '2018影像历']
     #'515209':'https://tuchong.com'#星岚
 }
 
@@ -108,18 +114,22 @@ poco_account_ids = {
         '174413193':{'author':'微醺十月', 'code':['0a7b1ac49e197a2730c', '2d40ce21f3bfaffc0c5', 'f74af9c4ec46e9f73f2', 'c93b3fbe3ffb38085f2', '7d18abacaf0975d9c3b', 'c09eeb4f7845393a62d', 'a2d27ef1c29475af2e4', 'f6ffc62381b7830561d', '09615a9e4a9a4ba5801']},#微醺
         '43324521':{'author':'格式化', 'code':['381cece374f92168968', '8dc14f147527b786c69', '6dffbb8e1e2ace70bb1', 'd651ece1f2fed9b9cdb', 'd6e2e2360bd2f0edcd4', 'f8105911ed0b19cb606', '438166aab0b657c345a', '70aa5efeecaee17b1b4', '3a8a614fb85ffc58bef', 'e1ee8fe833271702bf8']},#格式化
         #'173726994':{'author':'luna_atlantis', 'code':['c17e18e5906987a1a37','f0e35d1f614b4048bb5', '9c9e21b60e0c1b24c49','e651865217b87793924', 'edad2eadc9a3131b2d9','7ccc309cb566b7ff882','756699e8f2e1801b580','1a9ebd5b04ef8ecd2e9','2533dce3f2dd1a39486','3c3150ad3f68a02718b','ecaf919a314035834da','a76b7b53a5364b66f55']}#luna
+        '174487079':{'author':'阿牧AMS', 'code':['c986477cecb431de78c','72e894cdab7c1a494c8','cb826aa73f6cf060480', '9373d49ef0aa9fec061', 'ba65a157dad18879314','8087e6a7d537d26e811','82875b618847c255da8','d1064bccbba03d1f5be','']},
+        '52786312':{'author':'李梦鱼', 'code':['2ff5aab9d2d0cee5d97', '8019c86bdd982f5df9a', '4717a1f4c495dc0d634', '61e88b8fcf36336cae9', '3b9ddf10e087d1d069d', 'd6dc9c5358d29ccf389', 'b795b1064c6fe158c76', '8604cba3ce5d5b40497', '062734a25f77b37b458']},
+        '44988233':{'author':'路寒', 'code':['01d974a5aa0638ae88e', '6413c07da2352b85d20', '5daea7d1578be792ded', '00a4611755d154932e0', 'b869c304559ddadaead', '89b3c01874ee35fcea8', '4783c92c6b0e0764ed4', '7f06b1649bda36485d7', '691258d659cbd5f1365', '86dc36ff4c5de0880d1', 'e14ac36c8717fb99d49', 'bf33c774cb43c5c9511']}
 }
 
-tpy_blog_urls = [
-    'http://dp.pconline.com.cn/8806083',
-    'http://dp.pconline.com.cn/33941406',
-    'http://dp.pconline.com.cn/8640908,'
-    'http://dp.pconline.com.cn/31891740',
-    'http://dp.pconline.com.cn/34394448',
-    'http://dp.pconline.com.cn/15660510',
-    'http://dp.pconline.com.cn/45106808',
-    'http://dp.pconline.com.cn/8565706'
-]
+tpy_blog_urls = {
+    '拉登的情人':'http://dp.pconline.com.cn/8806083',
+    '阿末':'http://dp.pconline.com.cn/33941406',
+    'Sa视觉':'http://dp.pconline.com.cn/8640908',
+    '祁慢慢':'http://dp.pconline.com.cn/31891740',
+    '威笑':'http://dp.pconline.com.cn/34394448',
+    '沉香木':'http://dp.pconline.com.cn/15660510',
+    '流感小猪':'http://dp.pconline.com.cn/45106808',
+    'Longer':'http://dp.pconline.com.cn/8565706',
+    '十月天空':'http://dp.pconline.com.cn/26748817'
+}
 
 five_hundred_artist_list = [
     'https://500px.com/redbug',
@@ -198,5 +208,11 @@ lofter_blogs = [
     {'home':'http://ealelaomi.lofter.com', 'img_pattern':'.photowrapper .imgwrapper a::attr(bigimgsrc)'}, #右视角老秘
     {'home':'http://aaronsky.lofter.com'},
     #{'home':'http://xuewy.lofter.com'}#七七小姑凉
+]
+
+douban_movies = [
+    #{'name':'如懿传', 'id':'25812730'},
+    #{'name':'延禧攻略', 'id':'26999852'},
+    #{'name':'那些年','id':'4920528'}
 ]
 

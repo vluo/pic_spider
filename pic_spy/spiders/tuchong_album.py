@@ -37,11 +37,12 @@ class TuchongSpider(VBase.VBase):
         for id in self.account_ids:
             author = id
             if isinstance(self.account_ids[id], list):
-                self.account_ids[id] = self.account_ids[id][0]
                 author = self.account_ids[id][1]
+                self.account_ids[id] = self.account_ids[id][0]
                 self.author_mapping[id] = author
+                #print()
             #end if
-            save_path = self.__save_path(self.account_ids[id], author)
+            save_path = self._save_path(self.account_ids[id], author)
             to_crawl_album_num = 210
             print(save_path)
             if not self._crawlMorePages(save_path):
@@ -132,10 +133,14 @@ class TuchongSpider(VBase.VBase):
     #end def
 
 
-    def __save_path(self, url, uid):
+    def _save_path(self, url, uid):
         userHost = parse.urlparse(url)[1]
-        if userHost == 'tuchong.com':
-            userHost = uid + '.' + userHost
+        if userHost == 'tuchong.com':            
+            if uid not in self.account_ids:
+            	userHost = uid
+            else:
+            	userHost = uid + '.' + userHost
+            #end if
         #end if
         save_path = os.path.join(self.save_path, userHost)
         if not os.path.exists(save_path):

@@ -1,6 +1,8 @@
 import os, sys, shutil
 import time
 from PIL import Image
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 imgFormats = ('jpg', 'jpeg', 'png', 'gif')
 imgNum = 0

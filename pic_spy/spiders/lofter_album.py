@@ -71,10 +71,11 @@ class LofterSpider(VBase.VBase):
             'c0-scriptName':'ArchiveBean',
             'c0-methodName':'getArchivePostByTime',
             'c0-id':'0',
-            'c0-param0':'number:'+str(blog_id),#blog id
-            'c0-param1':'number:1533000287367',
-            'c0-param2':'number:'+str(post_num),
-            'c0-param3':'boolean:false',
+            'c0-param0':'boolean:false',
+            'c0-param1':'number:'+str(blog_id),#blog id
+            'c0-param2':'number:1533000287367',
+            'c0-param3':'number:'+str(post_num),
+            'c0-param4':'boolean:false',
             'batchId':'604545'
         }
         #formdata=postData, meta=self.xiami_cookie, method='POST', headers=headers
@@ -101,6 +102,7 @@ class LofterSpider(VBase.VBase):
 
         post_ids = re.findall('permalink="(.*?)"', response.text)
         if not post_ids:
+            self._add_log('not post id found >>>>>>> ' + response.text)
             print('not post id found')
         #end if
 

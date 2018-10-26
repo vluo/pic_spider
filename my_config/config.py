@@ -76,6 +76,7 @@ poco_account_ids = {
         '56546987':'56348c417ff0b182d1f',#城子
         '1242841':'85e8bb8eb5fb4528284',
         '174574453':{'author':'知竹zZ', 'code':['c5c57f81b141a804b92', '17c6be737559da73b38', '4aa87b0a2f57d6dae0f','cf880d59b713ddd8081','2495218bceac5a58959','f36bb002bff4d6b1b38']},
+        '33033403':{'author':'贝蓝品', 'code':['7c0d19505900e332ccf', 'da7a094e031e18893f9', 'fa6938f12d934590f54', 'e0f79b1575525a0ee0d']},
         '66431972':'841262702a1b4ce4183',
         '56509843':'11f3121c62dfc768da3',
         '174316516':'2a9836876849fa80820',
@@ -120,15 +121,17 @@ poco_account_ids = {
 }
 
 tpy_blog_urls = {
-    '拉登的情人':'http://dp.pconline.com.cn/8806083',
-    '阿末':'http://dp.pconline.com.cn/33941406',
-    'Sa视觉':'http://dp.pconline.com.cn/8640908',
-    '祁慢慢':'http://dp.pconline.com.cn/31891740',
-    '威笑':'http://dp.pconline.com.cn/34394448',
-    '沉香木':'http://dp.pconline.com.cn/15660510',
-    '流感小猪':'http://dp.pconline.com.cn/45106808',
-    'Longer':'http://dp.pconline.com.cn/8565706',
-    '十月天空':'http://dp.pconline.com.cn/26748817'
+    #'拉登的情人':'http://dp.pconline.com.cn/8806083',
+    #'阿末':'http://dp.pconline.com.cn/33941406',
+    #'Sa视觉':'http://dp.pconline.com.cn/8640908',
+    #'祁慢慢':'http://dp.pconline.com.cn/31891740',
+    #'威笑':'http://dp.pconline.com.cn/34394448',
+    #'沉香木':'http://dp.pconline.com.cn/15660510',
+    #'流感小猪':'http://dp.pconline.com.cn/45106808',
+    #'Longer':'http://dp.pconline.com.cn/8565706',
+    '贝蓝品':'http://dp.pconline.com.cn/2439704',
+    #'十月天空':'http://dp.pconline.com.cn/26748817',
+    'eale·右视觉':'https://dp.pconline.com.cn/7325423'
 }
 
 five_hundred_artist_list = [
@@ -174,8 +177,8 @@ xiami_collection = {
 }
 
 lofter_blogs = [
-    {'home':'http://linxiaoyisheying.lofter.com', 'img_pattern':'.box .pic a::attr(bigimgsrc)'},
-    {'home':'http://mmmaybe.lofter.com','img_pattern':'.box .pic a::attr(bigimgsrc)'},
+    #{'home':'http://linxiaoyisheying.lofter.com', 'img_pattern':'.box .pic a::attr(bigimgsrc)'},
+    #{'home':'http://mmmaybe.lofter.com','img_pattern':'.box .pic a::attr(bigimgsrc)'},
     {'home':'http://seewyn.lofter.com','img_pattern':'.content .wrap .img a::attr(bigimgsrc)'},
     {'home':'http://terryfengphotography.lofter.com','img_pattern':''},
     {'home':'http://misssecret.lofter.com','img_pattern':''},
@@ -214,6 +217,6 @@ douban_movies = [
     #{'name':'如懿传', 'id':'25812730'},
     #{'name':'延禧攻略', 'id':'26999852'},
     #{'name':'那些年','id':'4920528'},
-    {'name','影', 'id':'4864908'}
+    {'name':'影', 'id':'4864908'}
 ]
 
